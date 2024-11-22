@@ -1,0 +1,8 @@
+# Vi/Vim swap files
+.*.sw?
+
+# Binaries
+bin
+
+# Other files
+.DS_Store
