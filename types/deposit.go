@@ -26,8 +26,8 @@ type Deposit struct {
 	DepositCLIVersion  string
 }
 
+// Type aliases
 type (
-	// Type alias
 	DepositOption  = helpers.Option[*DepositMessage]
 	DepositOptions = helpers.Options[*DepositMessage]
 )
