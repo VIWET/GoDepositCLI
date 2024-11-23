@@ -3,8 +3,11 @@ package types
 import (
 	"fmt"
 
+	"github.com/viwet/GoDepositCLI/bls"
 	"github.com/viwet/GoDepositCLI/config"
 	"github.com/viwet/GoDepositCLI/helpers"
+	"github.com/viwet/GoDepositCLI/signing"
+	"github.com/viwet/GoDepositCLI/version"
 )
 
 // DepositData contains signed validator deposit data
@@ -23,8 +26,49 @@ type Deposit struct {
 	DepositCLIVersion  string
 }
 
-// Type alias
-type DepositOption = helpers.Option[*DepositMessage]
+type (
+	// Type alias
+	DepositOption  = helpers.Option[*DepositMessage]
+	DepositOptions = helpers.Options[*DepositMessage]
+)
+
+// NewDeposit returns new signed Deposit
+func NewDeposit(signingKey, withdrawalKey bls.SecretKey, config *config.ChainConfig, opts ...DepositOption) (*Deposit, error) {
+	message := DefaultDepositMessage(signingKey, withdrawalKey)
+	if err := DepositOptions(opts).Apply(&message); err != nil {
+		return nil, err
+	}
+
+	messageRoot, err := message.HashTreeRoot()
+	if err != nil {
+		return nil, err
+	}
+
+	domain, err := signing.DepositDomain(config.GenesisForkVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	signature, err := signing.SignData(signingKey, messageRoot[:], domain)
+	if err != nil {
+		return nil, err
+	}
+
+	data := DepositData{message, signature.Marshal()}
+	dataRoot, err := data.HashTreeRoot()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Deposit{
+		DepositData:        data,
+		DepositMessageRoot: messageRoot[:],
+		DepositDataRoot:    dataRoot[:],
+		ForkVersion:        config.GenesisForkVersion,
+		NetworkName:        config.Name,
+		DepositCLIVersion:  version.Version(),
+	}, nil
+}
 
 // WithAmount sets amount
 func WithAmount(amount uint64) DepositOption {
