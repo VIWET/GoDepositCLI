@@ -4,5 +4,8 @@
 # Binaries
 bin
 
+# Generated ssz
+*.ssz.go
+
 # Other files
 .DS_Store
