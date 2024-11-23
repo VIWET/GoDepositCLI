@@ -1,8 +1,11 @@
 package types
 
 import (
+	"encoding/json"
+
 	"github.com/viwet/GoDepositCLI/bls"
 	"github.com/viwet/GoDepositCLI/config"
+	"github.com/viwet/GoDepositCLI/helpers"
 	"github.com/viwet/GoDepositCLI/signing"
 )
 
@@ -17,8 +20,8 @@ type BLSToExecution struct {
 
 // BLSToExecution contains signed data needed for switching from BLS withdrawal credentials to contract address
 type SignedBLSToExecution struct {
-	Message   BLSToExecution
-	Signature []byte
+	Message   BLSToExecution `json:"message"`
+	Signature helpers.Hex    `json:"signature"`
 }
 
 // NewBLSToExecution return new signed BLSToExecution message
@@ -53,4 +56,18 @@ func NewBLSToExecution(
 		Message:   message,
 		Signature: signature.Marshal(),
 	}, nil
+}
+
+type BLSToExecutionJSON struct {
+	ValidatorIndex     uint64      `json:"validator_index"`
+	FromBLSPublicKey   helpers.Hex `json:"from_bls_pubkey"`
+	ToExecutionAddress helpers.Hex `json:"to_execution_address"`
+}
+
+func (m *BLSToExecution) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&BLSToExecutionJSON{
+		m.ValidatorIndex,
+		m.FromBLSPublicKey,
+		m.ToExecutionAddress,
+	})
 }
