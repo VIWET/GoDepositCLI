@@ -73,4 +73,10 @@ var (
 		Category: "Network",
 		Usage:    "Chain genesis validators root",
 	}
+
+	PasswordFlag = &cli.StringFlag{
+		Name:     "password",
+		Category: "Deposit",
+		Usage:    "Keystore password",
+	}
 )

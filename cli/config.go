@@ -9,6 +9,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/config"
+
+	keystore "github.com/viwet/GoKeystoreV4"
 )
 
 // IndexedConfig stores values by key index
@@ -173,4 +175,21 @@ func parseWithdrawalAddresses(addresses []string, from, to uint32) (*IndexedConf
 	}
 
 	return config, nil
+}
+
+// Crypto returns KeystoreV4 crypto modules from config
+func (cfg *DepositConfig) CryptoOptions() (keystore.CryptoOptions, error) {
+	var options []keystore.CryptoOption
+	if kdf := cfg.KeystoreKeyDerivationFunction; kdf != "" {
+		switch strings.ToLower(kdf) {
+		case "pbkdf2":
+			options = append(options, keystore.WithKDF(keystore.NewPBKDF2()))
+		case "scrypt":
+			options = append(options, keystore.WithKDF(keystore.NewScrypt()))
+		default:
+			return nil, fmt.Errorf("unknown kdf function: %s", kdf)
+		}
+	}
+
+	return options, nil
 }
