@@ -5,6 +5,7 @@ package cli
 import (
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/config"
+	"github.com/viwet/GoDepositCLI/types"
 )
 
 // DepositConfig stores all deposit related params
@@ -58,4 +59,17 @@ func newDepositConfigFromFlags(ctx *cli.Context) (*DepositConfig, error) {
 		Directory:                     directory,
 		KeystoreKeyDerivationFunction: keystoreKDF,
 	}, nil
+}
+
+// DepositOptions from config for given key index
+func (cfg *DepositConfig) DepositOptions(index uint32) types.DepositOptions {
+	var options []types.DepositOption
+	if amount := cfg.Amounts.Get(index); amount != 0 {
+		options = append(options, types.WithAmount(amount))
+	}
+	if withdrawalAddress := cfg.WithdrawalAddresses.Get(index); len(withdrawalAddress) != 0 {
+		options = append(options, types.WithWithdrawalAddress(withdrawalAddress))
+	}
+
+	return options
 }
