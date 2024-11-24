@@ -2,19 +2,19 @@ default: build
 
 .PHONY: test
 test: generate
-	go test -tags '$(TAGS)' ./...
+	go test -tags '$(NETWORK)' ./...
 
 .PHONY: run
 run: generate
-	go run -tags '$(TAGS)' .
+	go run -tags '$(NETWORK)' .
 
 .PHONY: build
 build: generate
-	go build -tags '$(TAGS)' -o ./bin/staking-cli .
+	go build -tags '$(NETWORK)' -o ./bin/staking-cli .
 
 .PHONY: generate
 generate:
-	go generate -tags '$(TAGS)' ./...
+	go generate -tags '$(NETWORK)' ./...
 
 .PHONY: clean
 clean:
