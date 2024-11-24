@@ -9,6 +9,8 @@ const (
 	MinDepositAmount uint64 = (1 << 8) * GweiPerEther
 	// Maximum allowed deposit in Bahamut chain
 	MaxDepositAmount uint64 = (1 << 13) * GweiPerEther
+	// Token suffix
+	TokenSuffix = "FTN"
 )
 
 // Bahamut Mainnet (Sahara) config

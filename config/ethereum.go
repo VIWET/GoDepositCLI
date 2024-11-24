@@ -9,6 +9,8 @@ const (
 	MinDepositAmount uint64 = (1 << 0) * GweiPerEther
 	// Maximum allowed deposit in Ethereum
 	MaxDepositAmount uint64 = (1 << 5) * GweiPerEther
+	// Token suffix
+	TokenSuffix = "ETH"
 )
 
 // Ethereum mainnet config

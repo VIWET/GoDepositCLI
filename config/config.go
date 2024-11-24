@@ -18,6 +18,8 @@ const (
 
 	// Fork version length
 	ForkVersionLength = 4
+
+	GweiSuffix  = "GWEI"
 )
 
 // Chain config
