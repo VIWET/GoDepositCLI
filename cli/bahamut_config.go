@@ -20,7 +20,7 @@ type DepositConfig struct {
 
 	ChainConfig *config.ChainConfig `json:"chain_config,omitempty"`
 
-	Amounts             *IndexedConfigWithDefault[uint64]  `json:"amount,omitempty"`
+	Amounts             *IndexedConfigWithDefault[uint64]  `json:"amounts,omitempty"`
 	ContractAddresses   *IndexedConfig[Address]            `json:"contract_addresses,omitempty"`
 	WithdrawalAddresses *IndexedConfigWithDefault[Address] `json:"withdrawal_addresses,omitempty"`
 
