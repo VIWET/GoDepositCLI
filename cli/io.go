@@ -59,16 +59,17 @@ func ReadMnemonic(ctx *cli.Context) ([]string, words.List, error) {
 		return nil, nil, err
 	}
 
-	if mnemonic := ctx.String(MnemonicFlag.Name); mnemonic != "" {
-		return strings.Split(mnemonic, " "), list, nil
+	var mnemonic []string
+	if ctx.IsSet(MnemonicFlag.Name) {
+		mnemonic = bip39.SplitMnemonic(strings.TrimSpace(ctx.String(MnemonicFlag.Name)))
+	} else {
+		var err error
+		mnemonic, err = ScanMnemonic()
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
-	mnemonic, err := ScanMnemonic()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	mnemonic = bip39.NormalizeMnemonic(mnemonic)
 	if err := bip39.ValidateMnemonic(mnemonic, list); err != nil {
 		return nil, nil, err
 	}
@@ -83,6 +84,8 @@ func ScanMnemonic() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	mnemonic = strings.TrimSpace(mnemonic)
 
 	return bip39.SplitMnemonic(mnemonic), nil
 }
