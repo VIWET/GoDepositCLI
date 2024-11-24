@@ -235,3 +235,121 @@ func newMnemonicConfigFromFlags(ctx *cli.Context) (*MnemonicConfig, error) {
 		Bitlen:   bitlen,
 	}, nil
 }
+
+// BLSToExecution config
+type BLSToExecutionConfig struct {
+	StartIndex uint32 `json:"start_index"`
+	Number     uint32 `json:"number"`
+
+	ChainConfig *config.ChainConfig `json:"chain_config,omitempty"`
+
+	ValidatorIndices    *IndexedConfig[uint64]             `json:"validator_indices,omitempty"`
+	WithdrawalAddresses *IndexedConfigWithDefault[Address] `json:"withdrawal_addresses,omitempty"`
+
+	Directory string `json:"directory"`
+}
+
+// NewBLSToExecutionConfigFromCLI return config from file if config file provided or from flags
+func NewBLSToExecutionConfigFromCLI(ctx *cli.Context) (*BLSToExecutionConfig, error) {
+	if filepath := ctx.String(BLSToExecutionConfigFlag.Name); filepath != "" {
+		return newBLSToExecutionConfigFromFile(filepath)
+	}
+
+	return newBLSToExecutionConfigFromFlags(ctx)
+}
+
+func newBLSToExecutionConfigFromFile(filepath string) (*BLSToExecutionConfig, error) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	cfg := new(BLSToExecutionConfig)
+	if err := json.NewDecoder(file).Decode(cfg); err != nil {
+		return nil, err
+	}
+
+	if cfg.ChainConfig == nil {
+		cfg.ChainConfig = config.MainnetConfig()
+	}
+
+	return cfg, nil
+}
+
+func newBLSToExecutionConfigFromFlags(ctx *cli.Context) (*BLSToExecutionConfig, error) {
+	var (
+		startIndex          = uint32(ctx.Uint(StartIndexFlag.Name))
+		number              = uint32(ctx.Uint(NumberFlag.Name))
+		indices             = ctx.StringSlice(ValidatorIndicesFlag.Name)
+		withdrawalAddresses = ctx.StringSlice(WithdrawalAddressesFlag.Name)
+		directory           = ctx.String(DirectoryFlag.Name)
+
+		from, to = startIndex, startIndex + number
+	)
+
+	chainConfig, err := parseChainConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	validatorIndicesConfig, err := parseValidatorIndices(indices, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	withdrawalAddressesConfig, err := parseWithdrawalAddresses(withdrawalAddresses, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(withdrawalAddressesConfig.Default) == 0 && len(withdrawalAddressesConfig.Config) != int(number) {
+		return nil, fmt.Errorf("withdrawal credentials must be set for all provided validators")
+	}
+
+	return &BLSToExecutionConfig{
+		StartIndex:          startIndex,
+		Number:              number,
+		ChainConfig:         chainConfig,
+		ValidatorIndices:    validatorIndicesConfig,
+		WithdrawalAddresses: withdrawalAddressesConfig,
+		Directory:           directory,
+	}, nil
+}
+
+func parseValidatorIndices(indices []string, from, to uint32) (*IndexedConfig[uint64], error) {
+	config := &IndexedConfig[uint64]{
+		Config: make(map[uint32]uint64),
+	}
+
+	for _, index := range indices {
+		values := strings.Split(index, ":")
+		if len(values) != 2 {
+			if to-from == 1 {
+				validator, err := ParseValidatorIndex(values[0])
+				if err != nil {
+					return nil, err
+				}
+
+				config.Config[from] = validator
+				continue
+			}
+
+			return nil, fmt.Errorf("cannot process `validator-indices` flag value")
+		}
+
+		index, err := ParseIndex(values[0], from, to)
+		if err != nil {
+			return nil, err
+		}
+
+		validator, err := ParseValidatorIndex(values[1])
+		if err != nil {
+			return nil, err
+		}
+
+		config.Config[uint32(index)] = validator
+	}
+
+	return config, nil
+}

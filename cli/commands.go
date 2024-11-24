@@ -41,24 +41,28 @@ var (
 		},
 		Flags: depositFlags,
 	}
+
+	BLSToExecutionCommand = &cli.Command{
+		Name:     "bls-to-execution",
+		Usage:    "Create BLSToExecution messages",
+		Category: "BLS to Execution",
+		Flags: []cli.Flag{
+			MnemonicConfigFlag,
+
+			MnemonicLanguageFlag,
+			MnemonicFlag,
+
+			BLSToExecutionConfigFlag,
+
+			StartIndexFlag,
+			NumberFlag,
+			ValidatorIndicesFlag,
+			WithdrawalAddressesFlag,
+			DirectoryFlag,
+
+			ChainNameFlag,
+			ChainGenesisForkVersion,
+			ChainGenesisValidatorsRoot,
+		},
+	}
 )
-
-// GenerateDepositsNewMnemonic is a cli.Action
-func GenerateDepositsNewMnemonic(ctx *cli.Context) error {
-	mnemonic, list, err := GenerateMnemonic(ctx)
-	if err != nil {
-		return err
-	}
-
-	return GenerateDeposits(ctx, mnemonic, list)
-}
-
-// GenerateDepositsNewMnemonic is a cli.Action
-func GenerateDepositsExistingMnemonic(ctx *cli.Context) error {
-	mnemonic, list, err := ReadMnemonic(ctx)
-	if err != nil {
-		return err
-	}
-
-	return GenerateDeposits(ctx, mnemonic, list)
-}

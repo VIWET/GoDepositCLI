@@ -75,18 +75,3 @@ func (cfg *DepositConfig) DepositOptions(index uint32) types.DepositOptions {
 
 	return options
 }
-
-var depositFlags = []cli.Flag{
-	DepositConfigFlag,
-
-	StartIndexFlag,
-	NumberFlag,
-	AmountsFlag,
-	WithdrawalAddressesFlag,
-	DirectoryFlag,
-	KeystoreKDFFlag,
-	ChainNameFlag,
-	ChainGenesisForkVersion,
-	ChainGenesisValidatorsRoot,
-	PasswordFlag,
-}

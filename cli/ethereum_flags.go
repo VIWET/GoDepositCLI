@@ -1,14 +1,8 @@
-//go:build !ethereum
+//go:build ethereum
 
 package cli
 
 import "github.com/urfave/cli/v2"
-
-var ContractAddressesFlag = &cli.StringSliceFlag{
-	Name:    "contracts",
-	Usage:   "Contract address to deposit with",
-	Aliases: []string{"contract", "c"},
-}
 
 var depositFlags = []cli.Flag{
 	DepositConfigFlag,
@@ -17,7 +11,6 @@ var depositFlags = []cli.Flag{
 	NumberFlag,
 	AmountsFlag,
 	WithdrawalAddressesFlag,
-	ContractAddressesFlag,
 	DirectoryFlag,
 	KeystoreKDFFlag,
 	ChainNameFlag,

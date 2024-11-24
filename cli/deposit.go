@@ -17,6 +17,26 @@ import (
 	keystore "github.com/viwet/GoKeystoreV4"
 )
 
+// GenerateDepositsNewMnemonic is a cli.Action
+func GenerateDepositsNewMnemonic(ctx *cli.Context) error {
+	mnemonic, list, err := GenerateMnemonic(ctx)
+	if err != nil {
+		return err
+	}
+
+	return GenerateDeposits(ctx, mnemonic, list)
+}
+
+// GenerateDepositsNewMnemonic is a cli.Action
+func GenerateDepositsExistingMnemonic(ctx *cli.Context) error {
+	mnemonic, list, err := ReadMnemonic(ctx)
+	if err != nil {
+		return err
+	}
+
+	return GenerateDeposits(ctx, mnemonic, list)
+}
+
 // GenerateDeposits generates deposit data and keystores from given menmonic and saves them into files
 func GenerateDeposits(ctx *cli.Context, mnemonic []string, list words.List) error {
 	config, err := NewDepositConfigFromCLI(ctx)

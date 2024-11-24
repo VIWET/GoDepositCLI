@@ -8,6 +8,7 @@ func NewApp() *cli.App {
 	app.HelpName = AppName
 	app.Commands = []*cli.Command{
 		DepositCommand,
+		BLSToExecutionCommand,
 	}
 
 	return app
