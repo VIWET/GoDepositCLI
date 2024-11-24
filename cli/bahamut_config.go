@@ -113,14 +113,20 @@ func parseContractAddresses(contracts []string, from, to uint32) (*IndexedConfig
 // DepositOptions from config for given key index
 func (cfg *DepositConfig) DepositOptions(index uint32) types.DepositOptions {
 	var options []types.DepositOption
-	if amount := cfg.Amounts.Get(index); amount != 0 {
-		options = append(options, types.WithAmount(amount))
+	if cfg.Amounts != nil {
+		if amount := cfg.Amounts.Get(index); amount != 0 {
+			options = append(options, types.WithAmount(amount))
+		}
 	}
-	if withdrawalAddress := cfg.WithdrawalAddresses.Get(index); len(withdrawalAddress) != 0 {
-		options = append(options, types.WithWithdrawalAddress(withdrawalAddress))
+	if cfg.WithdrawalAddresses != nil {
+		if withdrawalAddress := cfg.WithdrawalAddresses.Get(index); len(withdrawalAddress) != 0 {
+			options = append(options, types.WithWithdrawalAddress(withdrawalAddress))
+		}
 	}
-	if contractAddress, ok := cfg.ContractAddresses.Get(index); ok && len(contractAddress) != 0 {
-		options = append(options, types.WithContract(contractAddress))
+	if cfg.ContractAddresses != nil {
+		if contractAddress, ok := cfg.ContractAddresses.Get(index); ok && len(contractAddress) != 0 {
+			options = append(options, types.WithContract(contractAddress))
+		}
 	}
 
 	return options

@@ -47,8 +47,6 @@ var (
 		Usage:    "Create BLSToExecution messages",
 		Category: "BLS to Execution",
 		Flags: []cli.Flag{
-			MnemonicConfigFlag,
-
 			MnemonicLanguageFlag,
 			MnemonicFlag,
 

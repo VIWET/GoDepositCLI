@@ -66,11 +66,15 @@ func newDepositConfigFromFlags(ctx *cli.Context) (*DepositConfig, error) {
 // DepositOptions from config for given key index
 func (cfg *DepositConfig) DepositOptions(index uint32) types.DepositOptions {
 	var options []types.DepositOption
-	if amount := cfg.Amounts.Get(index); amount != 0 {
-		options = append(options, types.WithAmount(amount))
+	if cfg.Amounts != nil {
+		if amount := cfg.Amounts.Get(index); amount != 0 {
+			options = append(options, types.WithAmount(amount))
+		}
 	}
-	if withdrawalAddress := cfg.WithdrawalAddresses.Get(index); len(withdrawalAddress) != 0 {
-		options = append(options, types.WithWithdrawalAddress(withdrawalAddress))
+	if cfg.WithdrawalAddresses != nil {
+		if withdrawalAddress := cfg.WithdrawalAddresses.Get(index); len(withdrawalAddress) != 0 {
+			options = append(options, types.WithWithdrawalAddress(withdrawalAddress))
+		}
 	}
 
 	return options
