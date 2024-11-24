@@ -2,7 +2,10 @@
 
 package config
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+	"strings"
+)
 
 const (
 	// Minimum allowed deposit in Bahamut chain
@@ -16,6 +19,7 @@ const (
 // Bahamut Mainnet (Sahara) config
 const (
 	MainnetName                  = "mainnet"
+	SaharaName                   = "sahara"
 	MainnetGenesisForkVersion    = "00003341"
 	MainnetGenesisValidatorsRoot = "de82e35df831fe1dd9cf93ebc6e09fb042eeb852b448e09d2e3c5ed6b918e038"
 )
@@ -67,5 +71,20 @@ func HorizonConfig() *ChainConfig {
 		Name:                  HorizonName,
 		GenesisForkVersion:    genesisForkVersion,
 		GenesisValidatorsRoot: genesisValidatorsRoot,
+	}
+}
+
+// ConfigByNetworkName
+func ConfigByNetworkName(network string) (*ChainConfig, bool) {
+	network = strings.ToLower(network)
+	switch network {
+	case MainnetName:
+		return MainnetConfig(), true
+	case SaharaName:
+		return SaharaConfig(), true
+	case HorizonName:
+		return HorizonConfig(), true
+	default:
+		return nil, false
 	}
 }

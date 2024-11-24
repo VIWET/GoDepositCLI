@@ -64,3 +64,16 @@ func HoleskyConfig() *ChainConfig {
 		GenesisValidatorsRoot: genesisValidatorsRoot,
 	}
 }
+
+// ConfigByNetworkName
+func ConfigByNetworkName(network string) (*ChainConfig, bool) {
+	network = strings.ToLower(network)
+	switch network {
+	case MainnetName:
+		return MainnetConfig(), true
+	case HoleskyName:
+		return HoleskyConfig(), true
+	default:
+		return nil, false
+	}
+}
