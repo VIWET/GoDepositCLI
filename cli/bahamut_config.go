@@ -11,6 +11,8 @@ import (
 	"github.com/viwet/GoDepositCLI/types"
 )
 
+const AppName = "Bahamut chain Staking CLI"
+
 // DepositConfig stores all deposit related params
 type DepositConfig struct {
 	StartIndex uint32 `json:"start_index"`
@@ -122,4 +124,20 @@ func (cfg *DepositConfig) DepositOptions(index uint32) types.DepositOptions {
 	}
 
 	return options
+}
+
+var depositFlags = []cli.Flag{
+	DepositConfigFlag,
+
+	StartIndexFlag,
+	NumberFlag,
+	AmountsFlag,
+	WithdrawalAddressesFlag,
+	ContractAddressesFlag,
+	DirectoryFlag,
+	KeystoreKDFFlag,
+	ChainNameFlag,
+	ChainGenesisForkVersion,
+	ChainGenesisValidatorsRoot,
+	PasswordFlag,
 }

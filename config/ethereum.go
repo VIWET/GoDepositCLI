@@ -2,7 +2,10 @@
 
 package config
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+	"strings"
+)
 
 const (
 	// Minimum allowed deposit in Ethereum

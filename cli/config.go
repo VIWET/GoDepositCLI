@@ -193,3 +193,45 @@ func (cfg *DepositConfig) CryptoOptions() (keystore.CryptoOptions, error) {
 
 	return options, nil
 }
+
+// MnemonicConfig config
+type MnemonicConfig struct {
+	Language string `json:"language"`
+	Bitlen   uint   `json:"bitlen"`
+}
+
+// NewMnemonicConfigFromCLI return config from file if config file provided or from flags
+func NewMnemonicConfigFromCLI(ctx *cli.Context) (*MnemonicConfig, error) {
+	if filepath := ctx.String(MnemonicConfigFlag.Name); filepath != "" {
+		return newMnemonicConifgFromFile(filepath)
+	}
+
+	return newMnemonicConfigFromFlags(ctx)
+}
+
+func newMnemonicConifgFromFile(filepath string) (*MnemonicConfig, error) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	config := new(MnemonicConfig)
+	if err := json.NewDecoder(file).Decode(config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+func newMnemonicConfigFromFlags(ctx *cli.Context) (*MnemonicConfig, error) {
+	var (
+		language = ctx.String(MnemonicLanguageFlag.Name)
+		bitlen   = ctx.Uint(MnemonicBitlenFlag.Name)
+	)
+
+	return &MnemonicConfig{
+		Language: language,
+		Bitlen:   bitlen,
+	}, nil
+}

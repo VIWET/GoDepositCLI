@@ -1,12 +1,16 @@
 package cli
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v2"
+	bip39 "github.com/viwet/GoBIP39"
+	"github.com/viwet/GoBIP39/words"
 	"golang.org/x/term"
 )
 
@@ -41,6 +45,56 @@ func ScanPassword() (string, error) {
 	}
 
 	return string(password), nil
+}
+
+// ReadMnemonic from flags or stdin
+func ReadMnemonic(ctx *cli.Context) ([]string, words.List, error) {
+	config, err := NewMnemonicConfigFromCLI(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	list, err := LanguageToWordList(config.Language)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if mnemonic := ctx.String(MnemonicFlag.Name); mnemonic != "" {
+		return strings.Split(mnemonic, " "), list, nil
+	}
+
+	mnemonic, err := ScanMnemonic()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mnemonic = bip39.NormalizeMnemonic(mnemonic)
+	if err := bip39.ValidateMnemonic(mnemonic, list); err != nil {
+		return nil, nil, err
+	}
+
+	return mnemonic, list, nil
+}
+
+// ScanMnemonic from stdin
+func ScanMnemonic() ([]string, error) {
+	fmt.Println("Enter your mnemonic")
+	mnemonic, err := readMnemonic()
+	if err != nil {
+		return nil, err
+	}
+
+	return bip39.SplitMnemonic(mnemonic), nil
+}
+
+func readMnemonic() (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+	return reader.ReadString('\n')
+}
+
+// ShowMnemonic writes mnemonic into stdout
+func ShowMnemonic(mnemonic []string) {
+	fmt.Println(strings.Join(mnemonic, " "))
 }
 
 func ensureDirectoryExist(directory string) error {

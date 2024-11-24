@@ -79,4 +79,33 @@ var (
 		Category: "Deposit",
 		Usage:    "Keystore password",
 	}
+
+	MnemonicFlag = &cli.StringFlag{
+		Name:     "mnemonic",
+		Category: "Mnemonic",
+		Usage:    "Seed phrase",
+	}
+
+	MnemonicLanguageFlag = &cli.StringFlag{
+		Name:     "mnemonic-language",
+		Category: "Mnemonic",
+		Usage:    "Language of seed phrase",
+		Value:    "english",
+		Aliases:  []string{"language", "lang", "l"},
+	}
+
+	MnemonicBitlenFlag = &cli.UintFlag{
+		Name:     "mnemonic-bitlen",
+		Category: "Mnemonic",
+		Usage:    "Strength of seed generated",
+		Value:    256,
+		Aliases:  []string{"strength", "bitlen", "bl", "s"},
+	}
+
+	MnemonicConfigFlag = &cli.StringFlag{
+		Name:     "mnemonic-config",
+		Category: "Mnemonic",
+		Usage:    "Path to mnemonic config",
+		Aliases:  []string{"mnemonic-cfg", "mcfg"},
+	}
 )
