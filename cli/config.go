@@ -171,7 +171,6 @@ func parseWithdrawalAddresses(addresses []string, from, to uint32) (*IndexedConf
 		default:
 			return nil, fmt.Errorf("cannot process `withdrawal-addresses` flag value")
 		}
-
 	}
 
 	return config, nil
@@ -303,7 +302,7 @@ func newBLSToExecutionConfigFromFlags(ctx *cli.Context) (*BLSToExecutionConfig, 
 		return nil, err
 	}
 
-	if len(withdrawalAddressesConfig.Default) == 0 && len(withdrawalAddressesConfig.Config) != int(number) {
+	if len(withdrawalAddressesConfig.Default) != config.ExecutionAddressLength && len(withdrawalAddressesConfig.Config) != int(number) {
 		return nil, fmt.Errorf("withdrawal credentials must be set for all provided validators")
 	}
 
@@ -322,6 +321,7 @@ func parseValidatorIndices(indices []string, from, to uint32) (*IndexedConfig[ui
 		Config: make(map[uint32]uint64),
 	}
 
+	unique := make(map[uint64]uint32)
 	for _, index := range indices {
 		values := strings.Split(index, ":")
 		if len(values) != 2 {
@@ -346,6 +346,10 @@ func parseValidatorIndices(indices []string, from, to uint32) (*IndexedConfig[ui
 		validator, err := ParseValidatorIndex(values[1])
 		if err != nil {
 			return nil, err
+		}
+
+		if i, ok := unique[validator]; ok && i != uint32(index) {
+			return nil, fmt.Errorf("validator indices must be unique")
 		}
 
 		config.Config[uint32(index)] = validator

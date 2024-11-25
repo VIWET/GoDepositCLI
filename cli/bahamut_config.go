@@ -79,6 +79,7 @@ func parseContractAddresses(contracts []string, from, to uint32) (*IndexedConfig
 		Config: make(map[uint32]Address),
 	}
 
+	unique := make(map[[20]byte]uint32)
 	for _, contract := range contracts {
 		values := strings.Split(contract, ":")
 		if len(values) != 2 {
@@ -102,6 +103,10 @@ func parseContractAddresses(contracts []string, from, to uint32) (*IndexedConfig
 		contract, err := ParseAddress(values[1])
 		if err != nil {
 			return nil, err
+		}
+
+		if i, ok := unique[[20]byte(contract)]; ok && i != uint32(index) {
+			return nil, fmt.Errorf("contract addresses must be unique")
 		}
 
 		config.Config[uint32(index)] = contract
