@@ -97,12 +97,12 @@ var (
 	BLSToExecutionConfigFlag = &cli.StringFlag{
 		Name:     "bls-to-execution-config",
 		Usage:    "Path to bls to execution config",
-		Aliases:  []string{"blscfg"},
+		Aliases:  []string{"bls-to-exec-cfg", "blscfg"},
 	}
 
 	ValidatorIndicesFlag = &cli.StringSliceFlag{
 		Name:     "validator-indices",
 		Usage:    "Indices to generate bls to execution messages",
-		Aliases:  []string{"indices", "vi"},
+		Aliases:  []string{"validator-index", "indices", "vi"},
 	}
 )
