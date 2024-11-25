@@ -64,6 +64,6 @@ func LanguageToWordList(language string) (words.List, error) {
 	case "spanish":
 		return words.Spanish, nil
 	default:
-		return nil, fmt.Errorf("unknown language: %s", language)
+		return nil, fmt.Errorf("unknown language %s", language)
 	}
 }

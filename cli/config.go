@@ -91,7 +91,7 @@ func parseChainConfig(ctx *cli.Context) (*config.ChainConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(validatorsRoot) != config.HashLength {
+	if len(validatorsRoot) != config.HashLength && ctx.Command.Name == "bls-to-execution" {
 		return nil, fmt.Errorf("invalid genesis validators root length")
 	}
 
@@ -182,9 +182,9 @@ func (cfg *DepositConfig) CryptoOptions() (keystore.CryptoOptions, error) {
 	var options []keystore.CryptoOption
 	if kdf := cfg.KeystoreKeyDerivationFunction; kdf != "" {
 		switch strings.ToLower(kdf) {
-		case "pbkdf2":
+		case keystore.PBKDF2Name:
 			options = append(options, keystore.WithKDF(keystore.NewPBKDF2()))
-		case "scrypt":
+		case keystore.ScryptName:
 			options = append(options, keystore.WithKDF(keystore.NewScrypt()))
 		default:
 			return nil, fmt.Errorf("unknown kdf function: %s", kdf)
@@ -216,12 +216,12 @@ func newMnemonicConifgFromFile(filepath string) (*MnemonicConfig, error) {
 	}
 	defer file.Close()
 
-	config := new(MnemonicConfig)
-	if err := json.NewDecoder(file).Decode(config); err != nil {
+	cfg := new(MnemonicConfig)
+	if err := json.NewDecoder(file).Decode(cfg); err != nil {
 		return nil, err
 	}
 
-	return config, nil
+	return cfg, nil
 }
 
 func newMnemonicConfigFromFlags(ctx *cli.Context) (*MnemonicConfig, error) {
