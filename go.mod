@@ -25,7 +25,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/urfave/cli/v2 v2.27.5
 	github.com/viwet/GoBLS12381 v1.0.0
-	github.com/viwet/GoKeystoreV4 v1.0.0
+	github.com/viwet/GoKeystoreV4 v1.0.1
 	golang.org/x/term v0.26.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
