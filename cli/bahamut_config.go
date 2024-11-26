@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/config"
 	"github.com/viwet/GoDepositCLI/types"
+	keystore "github.com/viwet/GoKeystoreV4"
 )
 
 const AppName = "Bahamut chain Staking CLI"
@@ -27,6 +28,43 @@ type DepositConfig struct {
 	Directory string `json:"directory"`
 
 	KeystoreKeyDerivationFunction string `json:"kdf,omitempty"`
+}
+
+func validateDepositConfig(cfg *DepositConfig) error {
+	if cfg.Number == 0 {
+		return fmt.Errorf("cannot generate zero deposits")
+	}
+
+	if len(cfg.ChainConfig.GenesisForkVersion) != config.ForkVersionLength {
+		return fmt.Errorf("invalid fork version length")
+	}
+
+	var (
+		from = cfg.StartIndex
+		to   = cfg.StartIndex + cfg.Number
+	)
+
+	if err := validateAmounts(cfg.Amounts, from, to); err != nil {
+		return err
+	}
+
+	if err := validateContractAddresses(cfg.ContractAddresses, from, to); err != nil {
+		return err
+	}
+
+	if err := validateWithdrawalAddresses(cfg.WithdrawalAddresses, from, to); err != nil {
+		return err
+	}
+
+	if cfg.KeystoreKeyDerivationFunction != "" {
+		switch cfg.KeystoreKeyDerivationFunction {
+		case keystore.ScryptName, keystore.PBKDF2Name:
+		default:
+			return fmt.Errorf("invalid key derivation function (only scrypt and pbkdf2 allowed)")
+		}
+	}
+
+	return nil
 }
 
 func newDepositConfigFromFlags(ctx *cli.Context) (*DepositConfig, error) {
@@ -135,4 +173,36 @@ func (cfg *DepositConfig) DepositOptions(index uint32) types.DepositOptions {
 	}
 
 	return options
+}
+
+func validateContractAddresses(contracts *IndexedConfig[Address], from, to uint32) error {
+	if contracts == nil {
+		return nil
+	}
+
+	unique := make(map[[20]byte]uint32)
+	for index, contract := range contracts.Config {
+		if !IsValidIndex(index, from, to) {
+			return fmt.Errorf(
+				"invalid contracts index: expected index between %d and %d, but got %d",
+				from,
+				to,
+				index,
+			)
+		}
+
+		if !IsValidAddress(contract) {
+			return fmt.Errorf(
+				"invalid contract address: expected length %d, but got %d",
+				config.ExecutionAddressLength,
+				len(contract),
+			)
+		}
+
+		if i, ok := unique[[20]byte(contract)]; ok && i != index {
+			return fmt.Errorf("contract addresses must be unique")
+		}
+	}
+
+	return nil
 }

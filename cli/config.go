@@ -64,6 +64,14 @@ func newDepositConfigFromFile(filepath string) (*DepositConfig, error) {
 		cfg.ChainConfig = config.MainnetConfig()
 	}
 
+	if cfg.Directory == "" {
+		cfg.Directory = "./keys"
+	}
+
+	if err := validateDepositConfig(cfg); err != nil {
+		return nil, err
+	}
+
 	return cfg, nil
 }
 
@@ -220,6 +228,14 @@ func newMnemonicConifgFromFile(filepath string) (*MnemonicConfig, error) {
 		return nil, err
 	}
 
+	if cfg.Language == "" {
+		cfg.Language = "english"
+	}
+
+	if cfg.Bitlen == 0 {
+		cfg.Bitlen = 256
+	}
+
 	return cfg, nil
 }
 
@@ -248,6 +264,35 @@ type BLSToExecutionConfig struct {
 	Directory string `json:"directory"`
 }
 
+func validateBLSToExecutionConfig(cfg *BLSToExecutionConfig) error {
+	if cfg.Number == 0 {
+		return fmt.Errorf("cannot generate zero bls to execution messages")
+	}
+
+	if len(cfg.ChainConfig.GenesisForkVersion) != config.ForkVersionLength {
+		return fmt.Errorf("invalid fork version length")
+	}
+
+	if len(cfg.ChainConfig.GenesisValidatorsRoot) != config.HashLength {
+		return fmt.Errorf("invalid validators root length")
+	}
+
+	var (
+		from = cfg.StartIndex
+		to   = cfg.StartIndex + cfg.Number
+	)
+
+	if err := validateValidatorIndices(cfg.ValidatorIndices, cfg.Number, from, to); err != nil {
+		return err
+	}
+
+	if err := validateWithdrawalAddresses(cfg.WithdrawalAddresses, from, to); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // NewBLSToExecutionConfigFromCLI return config from file if config file provided or from flags
 func NewBLSToExecutionConfigFromCLI(ctx *cli.Context) (*BLSToExecutionConfig, error) {
 	if filepath := ctx.String(BLSToExecutionConfigFlag.Name); filepath != "" {
@@ -271,6 +316,14 @@ func newBLSToExecutionConfigFromFile(filepath string) (*BLSToExecutionConfig, er
 
 	if cfg.ChainConfig == nil {
 		cfg.ChainConfig = config.MainnetConfig()
+	}
+
+	if cfg.Directory == "" {
+		cfg.Directory = "./keys"
+	}
+
+	if err := validateBLSToExecutionConfig(cfg); err != nil {
+		return nil, err
 	}
 
 	return cfg, nil
@@ -356,4 +409,110 @@ func parseValidatorIndices(indices []string, from, to uint32) (*IndexedConfig[ui
 	}
 
 	return config, nil
+}
+
+func validateAmounts(amounts *IndexedConfigWithDefault[uint64], from, to uint32) error {
+	if amounts == nil {
+		return nil
+	}
+
+	if amounts.Default != 0 {
+		if !IsValidAmount(amounts.Default) {
+			return fmt.Errorf(
+				"invalid amount: expected amount between %d and %d and divisible by %d, but got %d",
+				config.MinDepositAmount,
+				config.MaxDepositAmount,
+				uint64(config.GweiPerEther),
+				amounts.Default,
+			)
+		}
+	}
+
+	for index, amount := range amounts.Config {
+		if !IsValidIndex(index, from, to) {
+			return fmt.Errorf(
+				"invalid index: expected index between %d and %d, but got %d",
+				from,
+				to,
+				index,
+			)
+		}
+
+		if !IsValidAmount(amount) {
+			return fmt.Errorf(
+				"invalid amount: expected amount between %d and %d and divisible by %d, but got %d",
+				config.MinDepositAmount,
+				config.MaxDepositAmount,
+				uint64(config.GweiPerEther),
+				amount,
+			)
+		}
+	}
+
+	return nil
+}
+
+func validateWithdrawalAddresses(addresses *IndexedConfigWithDefault[Address], from, to uint32) error {
+	if addresses == nil {
+		return nil
+	}
+
+	if len(addresses.Default) != 0 {
+		if !IsValidAddress(addresses.Default) {
+			return fmt.Errorf(
+				"invalid default address: expected length %d, but got %d",
+				config.ExecutionAddressLength,
+				len(addresses.Default),
+			)
+		}
+	}
+
+	for index, address := range addresses.Config {
+		if !IsValidIndex(index, from, to) {
+			return fmt.Errorf(
+				"invalid withdrawal addresses index: expected index between %d and %d, but got %d",
+				from,
+				to,
+				index,
+			)
+		}
+
+		if !IsValidAddress(address) {
+			return fmt.Errorf(
+				"invalid withdrawal address: expected length %d, but got %d",
+				config.ExecutionAddressLength,
+				len(address),
+			)
+		}
+	}
+
+	return nil
+}
+
+func validateValidatorIndices(indices *IndexedConfig[uint64], number, from, to uint32) error {
+	if indices == nil {
+		return fmt.Errorf("validator indices must be specified")
+	}
+
+	if uint32(len(indices.Config)) != number {
+		return fmt.Errorf("the number of validator indices is not equal to number of generated messages")
+	}
+
+	unique := make(map[uint64]uint32)
+	for index, validatorIndex := range indices.Config {
+		if !IsValidIndex(index, from, to) {
+			return fmt.Errorf(
+				"invalid validator indices index: expected index between %d and %d, but got %d",
+				from,
+				to,
+				index,
+			)
+		}
+
+		if i, ok := unique[validatorIndex]; ok && i != index {
+			return fmt.Errorf("validator indices must be unique")
+		}
+	}
+
+	return nil
 }

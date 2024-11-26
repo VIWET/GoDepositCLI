@@ -3,9 +3,12 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/config"
 	"github.com/viwet/GoDepositCLI/types"
+	keystore "github.com/viwet/GoKeystoreV4"
 )
 
 const AppName = "Ethereum 2.0 Staking CLI"
@@ -23,6 +26,39 @@ type DepositConfig struct {
 	Directory string `json:"directory"`
 
 	KeystoreKeyDerivationFunction string `json:"kdf,omitempty"`
+}
+
+func validateDepositConfig(cfg *DepositConfig) error {
+	if cfg.Number == 0 {
+		return fmt.Errorf("cannot generate zero deposits")
+	}
+
+	if len(cfg.ChainConfig.GenesisForkVersion) != config.ForkVersionLength {
+		return fmt.Errorf("invalid fork version length")
+	}
+
+	var (
+		from = cfg.StartIndex
+		to   = cfg.StartIndex + cfg.Number
+	)
+
+	if err := validateAmounts(cfg.Amounts, from, to); err != nil {
+		return err
+	}
+
+	if err := validateWithdrawalAddresses(cfg.WithdrawalAddresses, from, to); err != nil {
+		return err
+	}
+
+	if cfg.KeystoreKeyDerivationFunction != "" {
+		switch cfg.KeystoreKeyDerivationFunction {
+		case keystore.ScryptName, keystore.PBKDF2Name:
+		default:
+			return fmt.Errorf("invalid key derivation function (only scrypt and pbkdf2 allowed)")
+		}
+	}
+
+	return nil
 }
 
 func newDepositConfigFromFlags(ctx *cli.Context) (*DepositConfig, error) {

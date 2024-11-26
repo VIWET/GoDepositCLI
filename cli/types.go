@@ -61,7 +61,7 @@ func ParseGwei(amount string) (uint64, error) {
 			"invalid amount: expected amount between %d and %d and divisible by %d, but got %d",
 			config.MinDepositAmount,
 			config.MaxDepositAmount,
-			config.GweiPerEther,
+			uint64(config.GweiPerEther),
 			a,
 		)
 	}
@@ -71,7 +71,7 @@ func ParseGwei(amount string) (uint64, error) {
 
 // IsValidAmount returns false if amount less than MinDepositAmount or greater than MaxDepositAmount
 func IsValidAmount(amount uint64) bool {
-	return config.MinDepositAmount <= amount && amount <= config.MaxDepositAmount && amount%config.GweiPerEther != 0
+	return config.MinDepositAmount <= amount && amount <= config.MaxDepositAmount && amount%uint64(config.GweiPerEther) == 0
 }
 
 // ParseIndex returns key index between `from` and `to`
