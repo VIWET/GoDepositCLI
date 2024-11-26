@@ -83,7 +83,7 @@ make NETWORK=ethereum
 
 - `--keystore-kdf`
 
-	The key derivation function, that will be used for keystore generation. There are only two possible values: `script` and `pbkdf2`.
+	The key derivation function, that will be used for keystore generation. There are only two possible values: `scrypt` and `pbkdf2`.
 
 - `--chain`
 
