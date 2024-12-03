@@ -1,5 +1,7 @@
 default: build
 
+NETWORK=bahamut
+
 .PHONY: test
 test: generate
 	go test -tags '$(NETWORK)' ./...
