@@ -12,10 +12,16 @@ func ensureConfigIsValid(cfg *Config) error {
 		cfg.Number = 1
 	}
 
+	if cfg.ChainConfig == nil {
+		cfg.ChainConfig = config.MainnetConfig()
+	}
 	if err := ensureChainConfigIsValid(cfg.ChainConfig); err != nil {
-		return fmt.Errorf("invalid chain confing: %w", err)
+		return fmt.Errorf("invalid chain config: %w", err)
 	}
 
+	if cfg.MnemonicConfig == nil {
+		cfg.MnemonicConfig = new(MnemonicConfig)
+	}
 	if err := ensureMnemonicConfigIsValid(cfg.MnemonicConfig); err != nil {
 		return fmt.Errorf("invalid mnemonic config: %w", err)
 	}
