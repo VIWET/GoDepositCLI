@@ -2,6 +2,8 @@ package app
 
 import "github.com/viwet/GoDepositCLI/config"
 
+const DefaultOutputDirectory = "./validators_data"
+
 // Config is a base config
 type Config struct {
 	StartIndex uint32 `json:"start_index"`
