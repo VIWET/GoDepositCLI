@@ -60,6 +60,9 @@ func newCryptoOptionsFromConfig(cfg *DepositConfig) keystore.CryptoOptions {
 			options = append(options, keystore.WithKDF(keystore.NewPBKDF2()))
 		case keystore.ScryptName:
 			options = append(options, keystore.WithKDF(keystore.NewScrypt()))
+		default:
+			// Config is assumed validated
+			panic(ErrInvalidKDF)
 		}
 	}
 
