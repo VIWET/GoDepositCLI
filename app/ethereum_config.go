@@ -19,6 +19,10 @@ type DepositConfig struct {
 }
 
 func ensureDepositConfigIsValid(cfg *DepositConfig) error {
+	if cfg.Config == nil {
+		cfg.Config = new(Config)
+	}
+
 	if err := ensureConfigIsValid(cfg.Config); err != nil {
 		return err
 	}
