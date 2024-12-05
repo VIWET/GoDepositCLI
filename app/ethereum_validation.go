@@ -2,7 +2,7 @@
 
 package app
 
-func ensureDepositConfigIsValid(cfg *DepositConfig) error {
+func EnsureDepositConfigIsValid(cfg *DepositConfig) error {
 	if cfg.Config == nil {
 		cfg.Config = new(Config)
 	}
