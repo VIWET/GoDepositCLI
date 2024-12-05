@@ -2,11 +2,7 @@
 
 package app
 
-import (
-	"fmt"
-
-	keystore "github.com/viwet/GoKeystoreV4"
-)
+import "fmt"
 
 func ensureDepositConfigIsValid(cfg *DepositConfig) error {
 	if cfg.Config == nil {
@@ -34,14 +30,8 @@ func ensureDepositConfigIsValid(cfg *DepositConfig) error {
 		return err
 	}
 
-	if cfg.KeystoreKeyDerivationFunction == "" {
-		cfg.KeystoreKeyDerivationFunction = keystore.ScryptName
-	} else {
-		switch cfg.KeystoreKeyDerivationFunction {
-		case keystore.ScryptName, keystore.PBKDF2Name:
-		default:
-			return fmt.Errorf("invalid deposit config: %w", ErrInvalidKDF)
-		}
+	if err := ensureKeyDerivationFunctionIsValid(cfg); err != nil {
+		return err
 	}
 
 	return nil
