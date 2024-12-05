@@ -12,6 +12,8 @@ import (
 // Address type alias
 type Address [config.ExecutionAddressLength]byte
 
+var zeroAddress Address
+
 // FromHex parses hex string
 func (a *Address) FromHex(hexstr string) error {
 	hexstr = strings.TrimPrefix(hexstr, "0x")

@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/viwet/GoDepositCLI/config"
 	keystore "github.com/viwet/GoKeystoreV4"
@@ -151,10 +152,8 @@ func ensureWithdrawalAddressesConfigIsValid(cfg *IndexedConfigWithDefault[Addres
 }
 
 func ensureKeyDerivationFunctionIsValid(cfg *DepositConfig) error {
-	if cfg.KeystoreKeyDerivationFunction == "" {
-		cfg.KeystoreKeyDerivationFunction = keystore.ScryptName
-	} else {
-		switch cfg.KeystoreKeyDerivationFunction {
+	if cfg.KeystoreKeyDerivationFunction != "" {
+		switch strings.ToLower(cfg.KeystoreKeyDerivationFunction) {
 		case keystore.ScryptName, keystore.PBKDF2Name:
 		default:
 			return fmt.Errorf("invalid deposit config: %w", ErrInvalidKDF)

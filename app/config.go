@@ -1,6 +1,11 @@
 package app
 
-import "github.com/viwet/GoDepositCLI/config"
+import (
+	"strings"
+
+	"github.com/viwet/GoDepositCLI/config"
+	keystore "github.com/viwet/GoKeystoreV4"
+)
 
 const DefaultOutputDirectory = "./validators_data"
 
@@ -45,4 +50,18 @@ func (cfg *IndexedConfigWithDefault[T]) Get(index uint32) T {
 		return value
 	}
 	return cfg.Default
+}
+
+func newCryptoOptionsFromConfig(cfg *DepositConfig) keystore.CryptoOptions {
+	var options []keystore.CryptoOption
+	if kdf := cfg.KeystoreKeyDerivationFunction; kdf != "" {
+		switch strings.ToLower(kdf) {
+		case keystore.PBKDF2Name:
+			options = append(options, keystore.WithKDF(keystore.NewPBKDF2()))
+		case keystore.ScryptName:
+			options = append(options, keystore.WithKDF(keystore.NewScrypt()))
+		}
+	}
+
+	return options
 }
