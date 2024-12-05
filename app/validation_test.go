@@ -82,11 +82,6 @@ func Test_ensureDepositConfigIsValid(t *testing.T) {
 							},
 						},
 					},
-					ContractAddresses: &IndexedConfig[Address]{
-						Config: map[uint32]Address{
-							1: dead2,
-						},
-					},
 					KeystoreKeyDerivationFunction: "scrypt",
 				}
 			},
