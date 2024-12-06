@@ -11,9 +11,6 @@ import (
 
 // Config validation errors
 var (
-	ErrNumberIsZero      = errors.New("number cannot be 0")
-	ErrNoOutputDirectory = errors.New("output directory must be provided")
-
 	ErrInvalidGenesisForkVersion    = fmt.Errorf("invalid genesis fork version length, must be 4 bytes")
 	ErrInvalidGenesisValidatorsRoot = fmt.Errorf("invalid genesis validators root length, must be 32 bytes")
 
@@ -34,4 +31,10 @@ var (
 		config.MaxDepositAmount,
 		uint64(config.GweiPerEther),
 	)
+)
+
+// BLSToExecutionConfig validation errors
+var (
+	ErrNoWithdrawalAddresses = errors.New("no withdrawal addresses provided for BLS to Execution transition")
+	ErrNoValidatorIndices    = errors.New("no validator indices provided for BLS to Execution transition")
 )

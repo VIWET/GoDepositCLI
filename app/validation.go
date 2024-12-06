@@ -9,6 +9,32 @@ import (
 	keystore "github.com/viwet/GoKeystoreV4"
 )
 
+// EnsureBLSToExecutionConfigIsValid validates all bls to execution generation related configurations
+func EnsureBLSToExecutionConfigIsValid(cfg *BLSToExecutionConfig) error {
+	if cfg.Config == nil {
+		cfg.Config = new(Config)
+	}
+
+	if err := ensureConfigIsValid(cfg.Config); err != nil {
+		return err
+	}
+
+	var (
+		from = cfg.StartIndex
+		to   = cfg.StartIndex + cfg.Number
+	)
+
+	if err := ensureWithdrawalAddressesConfigIsValidBLS(cfg.WithdrawalAddresses, from, to); err != nil {
+		return err
+	}
+
+	if err := ensureValidatorIndicesConfigIsValid(cfg.ValidatorIndices, from, to); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ensureConfigIsValid(cfg *Config) error {
 	if cfg.Number == 0 {
 		cfg.Number = 1
@@ -158,6 +184,85 @@ func ensureKeyDerivationFunctionIsValid(cfg *DepositConfig) error {
 		default:
 			return fmt.Errorf("invalid deposit config: %w", ErrInvalidKDF)
 		}
+	}
+
+	return nil
+}
+
+func ensureWithdrawalAddressesConfigIsValidBLS(cfg *IndexedConfigWithDefault[Address], from, to uint32) error {
+	if cfg == nil {
+		return ErrNoWithdrawalAddresses
+	}
+
+	hasDefault := cfg.Default != zeroAddress
+	for index := range cfg.Config {
+		if !IsValidIndex(index, from, to) {
+			return fmt.Errorf(
+				"invalid withdrawal addresses config: key index should be between %d and %d, but got %d",
+				from,
+				to,
+				index,
+			)
+		}
+	}
+
+	defaultCount := (to - from) - uint32(len(cfg.Config))
+	if !hasDefault && defaultCount > 0 {
+		if defaultCount == to-from {
+			return ErrNoWithdrawalAddresses
+		}
+
+		missed := make([]uint32, 0, defaultCount)
+		for index := from; index < to; index++ {
+			if _, ok := cfg.Config[index]; !ok {
+				missed = append(missed, index)
+			}
+		}
+
+		return fmt.Errorf("no withdrawal addresses for key indices: %v", missed)
+	}
+
+	return nil
+}
+
+func ensureValidatorIndicesConfigIsValid(cfg *IndexedConfig[uint64], from, to uint32) error {
+	if cfg == nil {
+		return ErrNoValidatorIndices
+	}
+
+	unique := make(map[uint64]uint32)
+	for index, validatorIndex := range cfg.Config {
+		if !IsValidIndex(index, from, to) {
+			return fmt.Errorf(
+				"invalid validator indices config: key index should be between %d and %d, but got %d",
+				from,
+				to,
+				index,
+			)
+		}
+
+		if existingIndex, ok := unique[validatorIndex]; ok && existingIndex != index {
+			return fmt.Errorf(
+				"invalid validator indices config: %d and %d have the same validator index %d",
+				index,
+				existingIndex,
+				validatorIndex,
+			)
+		}
+
+		unique[validatorIndex] = index
+	}
+
+	if uint32(len(unique)) < to-from {
+		missedCount := to - from - uint32(len(unique))
+		missed := make([]uint32, 0, missedCount)
+		for index := from; index < to; index++ {
+			if _, ok := cfg.Config[index]; !ok {
+				missed = append(missed, index)
+			}
+		}
+
+		return fmt.Errorf("no validator indices for key indices: %v", missed)
 	}
 
 	return nil

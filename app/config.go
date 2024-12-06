@@ -52,6 +52,14 @@ func (cfg *IndexedConfigWithDefault[T]) Get(index uint32) T {
 	return cfg.Default
 }
 
+// BLSToExecutionConfig stores all bls to execution generation related data
+type BLSToExecutionConfig struct {
+	*Config
+
+	ValidatorIndices    *IndexedConfig[uint64]             `json:"validator_indices,omitempty"`
+	WithdrawalAddresses *IndexedConfigWithDefault[Address] `json:"withdrawal_addresses,omitempty"`
+}
+
 func newCryptoOptionsFromConfig(cfg *DepositConfig) keystore.CryptoOptions {
 	var options []keystore.CryptoOption
 	if kdf := cfg.KeystoreKeyDerivationFunction; kdf != "" {
