@@ -2,6 +2,7 @@
 
 package app
 
+// EnsureDepositConfigIsValid validates all deposit generation related configurations
 func EnsureDepositConfigIsValid(cfg *DepositConfig) error {
 	if cfg.Config == nil {
 		cfg.Config = new(Config)
