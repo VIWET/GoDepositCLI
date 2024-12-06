@@ -35,6 +35,7 @@ func GenerateDeposits(cfg *DepositConfig, mnemonic []string, list words.List, pa
 		keystores = append(keystores, keystore)
 	}
 
+	// TODO(viwet): save data in file or return from function
 	return nil
 }
 
