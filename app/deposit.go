@@ -12,10 +12,10 @@ import (
 )
 
 // GenerateDeposits generates all deposits and keystores according to the config
-func GenerateDeposits(cfg *DepositConfig, mnemonic []string, list words.List, password string) error {
+func GenerateDeposits(cfg *DepositConfig, mnemonic []string, list words.List, password string) ([]*types.Deposit, []*keystore.Keystore, error) {
 	seed, err := bip39.ExtractSeed(mnemonic, list, "")
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	var (
@@ -28,15 +28,14 @@ func GenerateDeposits(cfg *DepositConfig, mnemonic []string, list words.List, pa
 	for index := from; index < to; index++ {
 		deposit, keystore, err := generateDeposit(cfg, seed, index, password)
 		if err != nil {
-			return fmt.Errorf("cannot generate deposit data for key %d: %w", index, err)
+			return nil, nil, fmt.Errorf("cannot generate deposit data for key %d: %w", index, err)
 		}
 
 		deposits = append(deposits, deposit)
 		keystores = append(keystores, keystore)
 	}
 
-	// TODO(viwet): save data in file or return from function
-	return nil
+	return deposits, keystores, nil
 }
 
 func generateDeposit(cfg *DepositConfig, seed []byte, index uint32, password string) (*types.Deposit, *keystore.Keystore, error) {

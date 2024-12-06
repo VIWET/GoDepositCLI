@@ -10,10 +10,10 @@ import (
 )
 
 // GenerateDeposits generates all bls to execution messages according to the config
-func GenerateBLSToExecutionMessages(cfg *BLSToExecutionConfig, mnemonic []string, list words.List) error {
+func GenerateBLSToExecutionMessages(cfg *BLSToExecutionConfig, mnemonic []string, list words.List) ([]*types.SignedBLSToExecution, error) {
 	seed, err := bip39.ExtractSeed(mnemonic, list, "")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var (
@@ -25,14 +25,13 @@ func GenerateBLSToExecutionMessages(cfg *BLSToExecutionConfig, mnemonic []string
 	for index := from; index < to; index++ {
 		message, err := generateBLSToExecutionMessage(cfg, seed, index)
 		if err != nil {
-			return fmt.Errorf("cannot generate bls to execution message for key %d: %w", index, err)
+			return nil, fmt.Errorf("cannot generate bls to execution message for key %d: %w", index, err)
 		}
 
 		messages = append(messages, message)
 	}
 
-	// TODO(viwet): save data in file or return from function
-	return nil
+	return messages, nil
 }
 
 func generateBLSToExecutionMessage(cfg *BLSToExecutionConfig, seed []byte, index uint32) (*types.SignedBLSToExecution, error) {
