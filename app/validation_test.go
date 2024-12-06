@@ -286,7 +286,7 @@ func Test_ensureDepositConfigIsValid(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			config := test.makeConfig(t)
-			err := ensureDepositConfigIsValid(config)
+			err := EnsureDepositConfigIsValid(config)
 			if err != nil {
 				if err.Error() != test.error.Error() {
 					t.Fatalf("invalid error\nwant: %v\ngot:  %v", test.error, err)
