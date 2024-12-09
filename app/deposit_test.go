@@ -57,12 +57,12 @@ func Test_GenerateDeposits(t *testing.T) {
 				},
 				Directory: tempdir,
 			},
-			Amounts: &IndexedConfigWithDefault[uint64]{
-				Default: config.MaxDepositAmount / 2,
-				IndexedConfig: IndexedConfig[uint64]{
-					Config: map[uint32]uint64{
-						0: config.MaxDepositAmount,
-						1: config.MinDepositAmount,
+			Amounts: &IndexedConfigWithDefault[Amount]{
+				Default: Amount(config.MaxDepositAmount / 2),
+				IndexedConfig: IndexedConfig[Amount]{
+					Config: map[uint32]Amount{
+						0: Amount(config.MaxDepositAmount),
+						1: Amount(config.MinDepositAmount),
 					},
 				},
 			},
@@ -140,7 +140,7 @@ func Test_GenerateDeposits(t *testing.T) {
 			t.Fatal("invalid signature")
 		}
 
-		if amount := cfg.Amounts.Get(i); amount != d.Amount {
+		if amount := cfg.Amounts.Get(i); amount.Gwei() != d.Amount {
 			t.Fatalf("invalid amount - want: %d, got: %d", amount, d.Amount)
 		}
 

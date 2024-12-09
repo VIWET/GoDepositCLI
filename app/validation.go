@@ -120,13 +120,13 @@ func ensureMnemonicConfigIsValid(cfg *MnemonicConfig) error {
 	return nil
 }
 
-func ensureAmountsConfigIsValid(cfg *IndexedConfigWithDefault[uint64], from, to uint32) error {
+func ensureAmountsConfigIsValid(cfg *IndexedConfigWithDefault[Amount], from, to uint32) error {
 	if cfg == nil {
 		return nil
 	}
 
 	if cfg.Default != 0 {
-		if !IsValidAmount(cfg.Default) {
+		if !IsValidAmount(cfg.Default.Gwei()) {
 			return fmt.Errorf(
 				"invalid default amount %d: %w",
 				cfg.Default,
@@ -145,7 +145,7 @@ func ensureAmountsConfigIsValid(cfg *IndexedConfigWithDefault[uint64], from, to 
 			)
 		}
 
-		if !IsValidAmount(amount) {
+		if !IsValidAmount(amount.Gwei()) {
 			return fmt.Errorf(
 				"invalid amount config: invalid amount at index %d (%d): %w",
 				index,

@@ -66,11 +66,11 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 						},
 						Directory: "./validators_data",
 					},
-					Amounts: &IndexedConfigWithDefault[uint64]{
-						Default: config.MinDepositAmount,
-						IndexedConfig: IndexedConfig[uint64]{
-							Config: map[uint32]uint64{
-								1: config.MaxDepositAmount / 2,
+					Amounts: &IndexedConfigWithDefault[Amount]{
+						Default: Amount(config.MinDepositAmount),
+						IndexedConfig: IndexedConfig[Amount]{
+							Config: map[uint32]Amount{
+								1: Amount(config.MaxDepositAmount / 2),
 							},
 						},
 					},
@@ -220,8 +220,8 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 			name: "invalid config: invalid default config",
 			makeConfig: func(t *testing.T) *DepositConfig {
 				return &DepositConfig{
-					Amounts: &IndexedConfigWithDefault[uint64]{
-						Default: config.MinDepositAmount - 1,
+					Amounts: &IndexedConfigWithDefault[Amount]{
+						Default: Amount(config.MinDepositAmount - 1),
 					},
 				}
 			},
@@ -231,10 +231,10 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 			name: "invalid config: invalid key index",
 			makeConfig: func(t *testing.T) *DepositConfig {
 				return &DepositConfig{
-					Amounts: &IndexedConfigWithDefault[uint64]{
-						IndexedConfig: IndexedConfig[uint64]{
-							Config: map[uint32]uint64{
-								1: config.MaxDepositAmount,
+					Amounts: &IndexedConfigWithDefault[Amount]{
+						IndexedConfig: IndexedConfig[Amount]{
+							Config: map[uint32]Amount{
+								1: Amount(config.MaxDepositAmount),
 							},
 						},
 					},
@@ -246,10 +246,10 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 			name: "invalid config: invalid amount",
 			makeConfig: func(t *testing.T) *DepositConfig {
 				return &DepositConfig{
-					Amounts: &IndexedConfigWithDefault[uint64]{
-						IndexedConfig: IndexedConfig[uint64]{
-							Config: map[uint32]uint64{
-								0: config.MinDepositAmount - 1,
+					Amounts: &IndexedConfigWithDefault[Amount]{
+						IndexedConfig: IndexedConfig[Amount]{
+							Config: map[uint32]Amount{
+								0: Amount(config.MinDepositAmount - 1),
 							},
 						},
 					},
