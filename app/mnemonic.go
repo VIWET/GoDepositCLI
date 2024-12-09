@@ -14,7 +14,7 @@ func GenerateMnemonic(cfg *MnemonicConfig) ([]string, words.List, error) {
 		return nil, nil, err
 	}
 
-	list := languageFromMnemonicConfig(cfg)
+	list := LanguageFromMnemonicConfig(cfg)
 	mnemonic, err := bip39.ExtractMnemonic(entropy, list)
 	if err != nil {
 		return nil, nil, err
@@ -27,7 +27,8 @@ func GenerateMnemonic(cfg *MnemonicConfig) ([]string, words.List, error) {
 	return mnemonic, list, nil
 }
 
-func languageFromMnemonicConfig(cfg *MnemonicConfig) words.List {
+// LanguageFromMnemonicConfig returns words list from config
+func LanguageFromMnemonicConfig(cfg *MnemonicConfig) words.List {
 	switch strings.ReplaceAll(strings.ToLower(cfg.Language), " ", "") {
 	case "english":
 		return words.English
