@@ -63,7 +63,7 @@ make NETWORK=ethereum
 
 - `--withdrawal-addresses`
 
-	Aliases: `--withdraw-to`, `--wc`
+	Aliases: `--withdrawal-address`, `--withdraw-to`, `--w`
 
 	The addresses that will be used as withdrawal credentials. As well as in case of `--amounts`, it is possible to specify particular address for each key (`--withdraw-to="<key_index>:<address>`) and set the default one (`--withdraw-to=<address>`). Address value in this case is 20 byte hex string.
 
@@ -122,6 +122,10 @@ make NETWORK=ethereum
             "genesis_fork_version": "0x00004242",
             "genesis_validators_root": "0x4242424242424242424242424242424242424242424242424242424242424242"
         },
+        "mnemonic_config": {
+            "language": "english",
+            "bitlen": 256
+        },
         "amounts": {
             "default": 8192000000000,
             "config": {
@@ -147,10 +151,6 @@ make NETWORK=ethereum
     }
 	```
 
-### Mnemonic
-
-####  Flags
-
 - `--mnemonic-bitlen`
 
 	Aliases: `--strength`,  `--bitlen`, `--bl`, `-s`
@@ -166,21 +166,6 @@ make NETWORK=ethereum
 	Defulat: `english`
 
 	The language of mnemonic phrase, you can generate English, Chinese Simplified, Chinese Traditional, Czech, French, Italian, Japanese, Korean, Portuguese or Spanish mnemonic.
-
-- `--mnemonic-config`
-
-	Aliases: `--mnemonic-cfg`, `--mcfg`
-
-	The config file, that will be used for mnemonic generation.
-
-	Example:
-
-	```json
-	{
-		"language": "english",
-		"bitlen": 256
-	}
-	```
 
 - `--mnemonic`
 
@@ -268,9 +253,9 @@ and two new flags:
 	
 	The index of the validator in the chain. As well as `--contracts`, `--validator-indices` doesn't support a default value, so all values must be specified like this `--validator-index="<key_index>:<validator_index>"`, except the case when `--number` is equal to 1. You must specify validator indices for all `N` keys starting from `--start-index` value.
 
- - `--bls-to-execution-config` 
+ - `--config` 
 
-	 Aliases: `--bls-to-exec-cfg`, `--blscfg`
+	 Aliases: `--cfg`
 
 	The config file, that will be used for BLS to Execution messages generation.
 
@@ -284,6 +269,10 @@ and two new flags:
             "name": "mainnet",
             "genesis_fork_version": "0x00004242",
             "genesis_validators_root": "0x4242424242424242424242424242424242424242424242424242424242424242"
+        },
+        "mnemonic_config": {
+            "language": "english",
+            "bitlen": 256
         },
         "validator_indices": {
             "config": {
