@@ -481,7 +481,7 @@ func (b *BLSToExecutionConfigBuilder) buildValidatorIndices() error {
 	}
 
 	onDefault := func(index string) error {
-		return fmt.Errorf("invalid validator indices config: default validator index %d is not allowed", index)
+		return fmt.Errorf("invalid validator indices config: default validator index %s is not allowed", index)
 	}
 
 	onIndexed := func(index uint32, validatorIndex string) error {

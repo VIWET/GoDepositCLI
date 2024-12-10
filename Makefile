@@ -2,7 +2,7 @@ default: build
 
 NETWORK=bahamut
 
-GIT_VERSION=$(shell git describe --tags --always | sed 's/[\.]/ /g' | tr -d 'v')
+GIT_VERSION=$(shell git describe --tags | sed 's/[\.]/ /g' | tr -d 'v')
 
 GIT_MAJOR=$(word 1, $(GIT_VERSION))
 GIT_MINOR=$(word 2, $(GIT_VERSION))

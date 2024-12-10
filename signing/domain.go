@@ -4,7 +4,7 @@ import "github.com/viwet/GoDepositCLI/config"
 
 var (
 	// BLS Signature domain for beacon deposit verification
-	depositDomain = []byte{0x03, 0x00, 0x00, 0x00}
+	domainDeposit = []byte{0x03, 0x00, 0x00, 0x00}
 	// BLS Signature domain for beacon bls to execution message verification
 	domainBLSToExecution = []byte{0x0A, 0x00, 0x00, 0x00}
 )
@@ -18,7 +18,7 @@ func DepositDomain(fork []byte) ([]byte, error) {
 	}
 
 	domain := make([]byte, config.HashLength)
-	copy(domain[:config.ForkVersionLength], depositDomain)
+	copy(domain[:config.ForkVersionLength], domainDeposit)
 	copy(domain[config.ForkVersionLength:], root[:config.HashLength-config.ForkVersionLength])
 
 	return domain, nil
@@ -33,7 +33,7 @@ func BLSToExecutionDomain(fork []byte, validatorsRoot []byte) ([]byte, error) {
 	}
 
 	domain := make([]byte, 32)
-	copy(domain[:config.ForkVersionLength], depositDomain)
+	copy(domain[:config.ForkVersionLength], domainBLSToExecution)
 	copy(domain[config.ForkVersionLength:], root[:config.HashLength-config.ForkVersionLength])
 
 	return domain, nil
