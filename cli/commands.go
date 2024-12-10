@@ -3,65 +3,37 @@ package cli
 import "github.com/urfave/cli/v2"
 
 var (
-	DepositNewMnemonicCommand = &cli.Command{
-		Name:     "new-mnemonic",
-		Aliases:  []string{"new"},
-		Usage:    "Create deposits and new mnemonic",
-		Category: "Deposit",
-		Action:   GenerateDepositsNewMnemonic,
-		Flags: []cli.Flag{
-			MnemonicConfigFlag,
+	commands = []*cli.Command{DepositCommand, BLSToExecutionCommand}
 
-			MnemonicBitlenFlag,
-			MnemonicLanguageFlag,
-		},
+	NewMnemonicCommand = &cli.Command{
+		Name:    "new-mnemonic",
+		Aliases: []string{"new"},
+		Usage:   "Generate new mnemonic and deposits",
+		Flags:   depositNewMnemonicFlags,
+		Action:  GenerateDepositsFromNewMnemonic,
 	}
 
-	DepositExistingMnemonicCommand = &cli.Command{
-		Name:     "existing-mnemonic",
-		Aliases:  []string{"existing"},
-		Usage:    "Create deposits with existing mnemonic",
-		Category: "Deposit",
-		Action:   GenerateDepositsExistingMnemonic,
-		Flags: []cli.Flag{
-			MnemonicConfigFlag,
-
-			MnemonicLanguageFlag,
-			MnemonicFlag,
-		},
+	ExistingMnemonicCommand = &cli.Command{
+		Name:    "existing-mnemonic",
+		Aliases: []string{"existing"},
+		Usage:   "Generate deposits using existing mnemonic",
+		Flags:   depositExistingMnemonicFlags,
+		Action:  GenerateDepositsFromExistingMnemonic,
 	}
 
 	DepositCommand = &cli.Command{
-		Name:     "deposit",
-		Usage:    "Create new deposits",
-		Category: "Deposit",
+		Name:  "deposit",
+		Usage: "Generate deposits using new mnemonic or existing one",
 		Subcommands: []*cli.Command{
-			DepositNewMnemonicCommand,
-			DepositExistingMnemonicCommand,
+			NewMnemonicCommand,
+			ExistingMnemonicCommand,
 		},
-		Flags: depositFlags,
 	}
 
 	BLSToExecutionCommand = &cli.Command{
-		Name:     "bls-to-execution",
-		Usage:    "Create BLSToExecution messages",
-		Category: "BLS to Execution",
-		Action:   GenerateBLSToExecution,
-		Flags: []cli.Flag{
-			MnemonicLanguageFlag,
-			MnemonicFlag,
-
-			BLSToExecutionConfigFlag,
-
-			StartIndexFlag,
-			NumberFlag,
-			ValidatorIndicesFlag,
-			WithdrawalAddressesFlag,
-			DirectoryFlag,
-
-			ChainNameFlag,
-			ChainGenesisForkVersion,
-			ChainGenesisValidatorsRoot,
-		},
+		Name:   "bls-to-execution",
+		Usage:  "Generate BLS to Execution transition messages from existing mnemonic",
+		Flags:  blsToExecutionFlags,
+		Action: GenerateBLSToExecution,
 	}
 )

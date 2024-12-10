@@ -4,17 +4,40 @@ package cli
 
 import "github.com/urfave/cli/v2"
 
-var depositFlags = []cli.Flag{
-	DepositConfigFlag,
+var (
+	depositNewMnemonicFlags = []cli.Flag{
+		ConfigFlag,
 
-	StartIndexFlag,
-	NumberFlag,
-	AmountsFlag,
-	WithdrawalAddressesFlag,
-	DirectoryFlag,
-	KeystoreKDFFlag,
-	ChainNameFlag,
-	ChainGenesisForkVersion,
-	ChainGenesisValidatorsRoot,
-	PasswordFlag,
-}
+		StartIndexFlag,
+		NumberFlag,
+		ChainNameFlag,
+		ChainGenesisForkVersionFlag,
+		ChainGenesisValidatorsRootFlag,
+		MnemonicLanguageFlag,
+		MnemonicBitlenFlag,
+		DirectoryFlag,
+		AmountsFlag,
+		WithdrawalAddressesFlag,
+		KeystoreKDFFlag,
+
+		PasswordFlag,
+	}
+
+	depositExistingMnemonicFlags = []cli.Flag{
+		ConfigFlag,
+
+		StartIndexFlag,
+		NumberFlag,
+		ChainNameFlag,
+		ChainGenesisForkVersionFlag,
+		ChainGenesisValidatorsRootFlag,
+		MnemonicFlag,
+		MnemonicLanguageFlag,
+		DirectoryFlag,
+		AmountsFlag,
+		WithdrawalAddressesFlag,
+		KeystoreKDFFlag,
+
+		PasswordFlag,
+	}
+)

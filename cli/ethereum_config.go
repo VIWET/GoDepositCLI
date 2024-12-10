@@ -3,115 +3,75 @@
 package cli
 
 import (
-	"fmt"
+	"encoding/hex"
+	"strings"
 
 	"github.com/urfave/cli/v2"
-	"github.com/viwet/GoDepositCLI/config"
-	"github.com/viwet/GoDepositCLI/types"
-	keystore "github.com/viwet/GoKeystoreV4"
+	"github.com/viwet/GoDepositCLI/app"
 )
 
-const AppName = "Ethereum 2.0 Staking CLI"
-
-// DepositConfig stores all deposit related params
-type DepositConfig struct {
-	StartIndex uint32 `json:"start_index"`
-	Number     uint32 `json:"number"`
-
-	ChainConfig *config.ChainConfig `json:"chain_config,omitempty"`
-
-	Amounts             *IndexedConfigWithDefault[uint64]  `json:"amount,omitempty"`
-	WithdrawalAddresses *IndexedConfigWithDefault[Address] `json:"withdrawal_addresses,omitempty"`
-
-	Directory string `json:"directory"`
-
-	KeystoreKeyDerivationFunction string `json:"kdf,omitempty"`
-}
-
-func validateDepositConfig(cfg *DepositConfig) error {
-	if cfg.Number == 0 {
-		return fmt.Errorf("cannot generate zero deposits")
-	}
-
-	if len(cfg.ChainConfig.GenesisForkVersion) != config.ForkVersionLength {
-		return fmt.Errorf("invalid fork version length")
-	}
-
-	var (
-		from = cfg.StartIndex
-		to   = cfg.StartIndex + cfg.Number
-	)
-
-	if err := validateAmounts(cfg.Amounts, from, to); err != nil {
+func (b *DepositConfigBuilder) build() error {
+	if err := b.buildAmounts(); err != nil {
 		return err
 	}
 
-	if err := validateWithdrawalAddresses(cfg.WithdrawalAddresses, from, to); err != nil {
+	if err := b.buildWithdrawalAddresses(); err != nil {
 		return err
-	}
-
-	if cfg.KeystoreKeyDerivationFunction != "" {
-		switch cfg.KeystoreKeyDerivationFunction {
-		case keystore.ScryptName, keystore.PBKDF2Name:
-		default:
-			return fmt.Errorf("invalid key derivation function (only scrypt and pbkdf2 allowed)")
-		}
 	}
 
 	return nil
 }
 
-func newDepositConfigFromFlags(ctx *cli.Context) (*DepositConfig, error) {
-	var (
-		startIndex          = uint32(ctx.Uint(StartIndexFlag.Name))
-		number              = uint32(ctx.Uint(NumberFlag.Name))
-		amounts             = ctx.StringSlice(AmountsFlag.Name)
-		withdrawalAddresses = ctx.StringSlice(WithdrawalAddressesFlag.Name)
-		directory           = ctx.String(DirectoryFlag.Name)
-		keystoreKDF         = ctx.String(KeystoreKDFFlag.Name)
+func newDepositConfigFromFlags(ctx *cli.Context) (*app.DepositConfig, error) {
+	builder := NewDepositConfigBuilder()
 
-		from, to = startIndex, startIndex + number
-	)
+	builder.StartIndex(uint32(ctx.Uint(StartIndexFlag.Name)))
+	builder.Number(uint32(ctx.Uint(NumberFlag.Name)))
 
-	chainConfig, err := parseChainConfig(ctx)
-	if err != nil {
-		return nil, err
+	if ctx.IsSet(ChainNameFlag.Name) {
+		builder.Chain(ctx.String(ChainNameFlag.Name))
 	}
 
-	amountsConfig, err := parseAmounts(amounts, from, to)
-	if err != nil {
-		return nil, err
-	}
-
-	withdrawalAddressesConfig, err := parseWithdrawalAddresses(withdrawalAddresses, from, to)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DepositConfig{
-		StartIndex:                    startIndex,
-		Number:                        number,
-		ChainConfig:                   chainConfig,
-		Amounts:                       amountsConfig,
-		WithdrawalAddresses:           withdrawalAddressesConfig,
-		Directory:                     directory,
-		KeystoreKeyDerivationFunction: keystoreKDF,
-	}, nil
-}
-
-// DepositOptions from config for given key index
-func (cfg *DepositConfig) DepositOptions(index uint32) types.DepositOptions {
-	var options []types.DepositOption
-	if cfg.Amounts != nil {
-		if amount := cfg.Amounts.Get(index); amount != 0 {
-			options = append(options, types.WithAmount(amount))
+	if ctx.IsSet(ChainGenesisForkVersionFlag.Name) {
+		forkVersion, err := hex.DecodeString(strings.TrimPrefix(ctx.String(ChainGenesisForkVersionFlag.Name), "0x"))
+		if err != nil {
+			return nil, err
 		}
-	}
-	if cfg.WithdrawalAddresses != nil {
-		if withdrawalAddress := cfg.WithdrawalAddresses.Get(index); len(withdrawalAddress) != 0 {
-			options = append(options, types.WithWithdrawalAddress(withdrawalAddress))
-		}
+		builder.GenesisForkVersion(forkVersion)
 	}
 
-	return options
+	if ctx.IsSet(ChainGenesisForkVersionFlag.Name) {
+		forkVersion, err := hex.DecodeString(
+			strings.TrimPrefix(
+				ctx.String(ChainGenesisForkVersionFlag.Name),
+				"0x",
+			),
+		)
+		if err != nil {
+			return nil, err
+		}
+		builder.GenesisForkVersion(forkVersion)
+	}
+
+	if ctx.IsSet(ChainGenesisValidatorsRootFlag.Name) {
+		forkVersion, err := hex.DecodeString(
+			strings.TrimPrefix(
+				ctx.String(ChainGenesisValidatorsRootFlag.Name),
+				"0x",
+			),
+		)
+		if err != nil {
+			return nil, err
+		}
+		builder.GenesisForkVersion(forkVersion)
+	}
+
+	builder.MnemonicLanguage(ctx.String(MnemonicLanguageFlag.Name))
+	builder.MnemonicBitlen(ctx.Uint(MnemonicBitlenFlag.Name))
+	builder.Directory(ctx.String(DirectoryFlag.Name))
+	builder.Amounts(ctx.StringSlice(AmountsFlag.Name)...)
+	builder.WithdrawalAddresses(ctx.StringSlice(WithdrawalAddressesFlag.Name)...)
+	builder.KeystoreKDF(ctx.String(KeystoreKDFFlag.Name))
+
+	return builder.Build()
 }

@@ -10,18 +10,42 @@ var ContractAddressesFlag = &cli.StringSliceFlag{
 	Aliases: []string{"contract", "c"},
 }
 
-var depositFlags = []cli.Flag{
-	DepositConfigFlag,
+var (
+	depositNewMnemonicFlags = []cli.Flag{
+		ConfigFlag,
 
-	StartIndexFlag,
-	NumberFlag,
-	AmountsFlag,
-	WithdrawalAddressesFlag,
-	ContractAddressesFlag,
-	DirectoryFlag,
-	KeystoreKDFFlag,
-	ChainNameFlag,
-	ChainGenesisForkVersion,
-	ChainGenesisValidatorsRoot,
-	PasswordFlag,
-}
+		StartIndexFlag,
+		NumberFlag,
+		ChainNameFlag,
+		ChainGenesisForkVersionFlag,
+		ChainGenesisValidatorsRootFlag,
+		MnemonicLanguageFlag,
+		MnemonicBitlenFlag,
+		DirectoryFlag,
+		AmountsFlag,
+		WithdrawalAddressesFlag,
+		ContractAddressesFlag,
+		KeystoreKDFFlag,
+
+		PasswordFlag,
+	}
+
+	depositExistingMnemonicFlags = []cli.Flag{
+		ConfigFlag,
+
+		StartIndexFlag,
+		NumberFlag,
+		ChainNameFlag,
+		ChainGenesisForkVersionFlag,
+		ChainGenesisValidatorsRootFlag,
+		MnemonicFlag,
+		MnemonicLanguageFlag,
+		DirectoryFlag,
+		AmountsFlag,
+		WithdrawalAddressesFlag,
+		ContractAddressesFlag,
+		KeystoreKDFFlag,
+
+		PasswordFlag,
+	}
+)

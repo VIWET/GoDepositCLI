@@ -17,16 +17,45 @@ var (
 		Aliases: []string{"num", "n"},
 	}
 
-	AmountsFlag = &cli.StringSliceFlag{
-		Name:    "amounts",
-		Usage:   "Amounts to deposit",
-		Aliases: []string{"amount", "a"},
+	ChainNameFlag = &cli.StringFlag{
+		Name:    "chain",
+		Usage:   "Chain to deposit",
+		Value:   "mainnet",
+		Aliases: []string{"network"},
 	}
 
-	WithdrawalAddressesFlag = &cli.StringSliceFlag{
-		Name:    "withdrawal-addresses",
-		Usage:   "Withdrawal addresses to deposit with",
-		Aliases: []string{"withdraw-to", "wc"},
+	ChainGenesisForkVersionFlag = &cli.StringFlag{
+		Name:  "genesis-fork",
+		Usage: "Chain genesis fork version",
+	}
+
+	ChainGenesisValidatorsRootFlag = &cli.StringFlag{
+		Name:  "genesis-validators-root",
+		Usage: "Chain genesis validators root",
+	}
+
+	MnemonicFlag = &cli.StringFlag{
+		Name:  "mnemonic",
+		Usage: "Seed phrase",
+	}
+
+	PasswordFlag = &cli.StringFlag{
+		Name:  "password",
+		Usage: "Keystore password",
+	}
+
+	MnemonicLanguageFlag = &cli.StringFlag{
+		Name:    "language",
+		Usage:   "Language of seed phrase",
+		Value:   "english",
+		Aliases: []string{"lang", "l"},
+	}
+
+	MnemonicBitlenFlag = &cli.UintFlag{
+		Name:    "bitlen",
+		Usage:   "Strength of seed generated",
+		Value:   256,
+		Aliases: []string{"strength"},
 	}
 
 	DirectoryFlag = &cli.StringFlag{
@@ -36,68 +65,27 @@ var (
 		Aliases: []string{"dir", "d"},
 	}
 
+	AmountsFlag = &cli.StringSliceFlag{
+		Name:    "amounts",
+		Usage:   "Amounts to deposit",
+		Aliases: []string{"amount", "a"},
+	}
+
+	WithdrawalAddressesFlag = &cli.StringSliceFlag{
+		Name:    "withdrawal-addresses",
+		Usage:   "Withdrawal addresses to deposit with",
+		Aliases: []string{"withdrawal-address", "withdraw-to", "w"},
+	}
+
 	KeystoreKDFFlag = &cli.StringFlag{
-		Name:  "keystore-kdf",
+		Name:  "kdf",
 		Usage: "Key derivation function (scrypt, pbkdf2)",
 	}
 
-	DepositConfigFlag = &cli.StringFlag{
+	ConfigFlag = &cli.StringFlag{
 		Name:    "config",
-		Usage:   "Path to deposit config",
+		Usage:   "Path to config file",
 		Aliases: []string{"cfg"},
-	}
-
-	ChainNameFlag = &cli.StringFlag{
-		Name:    "chain",
-		Usage:   "Chain to deposit",
-		Value:   "mainnet",
-		Aliases: []string{"network"},
-	}
-
-	ChainGenesisForkVersion = &cli.StringFlag{
-		Name:  "genesis-fork",
-		Usage: "Chain genesis fork version",
-	}
-
-	ChainGenesisValidatorsRoot = &cli.StringFlag{
-		Name:  "genesis-validators-root",
-		Usage: "Chain genesis validators root",
-	}
-
-	PasswordFlag = &cli.StringFlag{
-		Name:  "password",
-		Usage: "Keystore password",
-	}
-
-	MnemonicFlag = &cli.StringFlag{
-		Name:  "mnemonic",
-		Usage: "Seed phrase",
-	}
-
-	MnemonicLanguageFlag = &cli.StringFlag{
-		Name:    "mnemonic-language",
-		Usage:   "Language of seed phrase",
-		Value:   "english",
-		Aliases: []string{"language", "lang", "l"},
-	}
-
-	MnemonicBitlenFlag = &cli.UintFlag{
-		Name:    "mnemonic-bitlen",
-		Usage:   "Strength of seed generated",
-		Value:   256,
-		Aliases: []string{"strength", "bitlen", "bl", "s"},
-	}
-
-	MnemonicConfigFlag = &cli.StringFlag{
-		Name:    "mnemonic-config",
-		Usage:   "Path to mnemonic config",
-		Aliases: []string{"mnemonic-cfg", "mcfg"},
-	}
-
-	BLSToExecutionConfigFlag = &cli.StringFlag{
-		Name:    "bls-to-execution-config",
-		Usage:   "Path to bls to execution config",
-		Aliases: []string{"bls-to-exec-cfg", "blscfg"},
 	}
 
 	ValidatorIndicesFlag = &cli.StringSliceFlag{
@@ -106,3 +94,17 @@ var (
 		Aliases: []string{"validator-index", "indices", "vi"},
 	}
 )
+
+var blsToExecutionFlags = []cli.Flag{
+	ConfigFlag,
+
+	StartIndexFlag,
+	NumberFlag,
+	ChainNameFlag,
+	ChainGenesisForkVersionFlag,
+	ChainGenesisValidatorsRootFlag,
+	MnemonicLanguageFlag,
+	DirectoryFlag,
+	WithdrawalAddressesFlag,
+	ValidatorIndicesFlag,
+}
