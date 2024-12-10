@@ -114,7 +114,7 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 			error: fmt.Errorf("invalid chain config: %w", ErrInvalidGenesisForkVersion),
 		},
 		{
-			name: "invalid config: invalid validators root",
+			name: "invalid config: invalid validators root (nil error because of skipping validation)",
 			makeConfig: func(t *testing.T) *DepositConfig {
 				genesisForkVersion, err := hex.DecodeString(deadGenesisForkVersion)
 				if err != nil {
@@ -135,7 +135,7 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 					},
 				}
 			},
-			error: fmt.Errorf("invalid chain config: %w", ErrInvalidGenesisValidatorsRoot),
+			error: nil,
 		},
 		{
 			name: "invalid config: mainnet chain config with different fork version",
@@ -164,7 +164,7 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid config: mainnet chain config with different validators root",
+			name: "invalid config: mainnet chain config with different validators root (nil error because of skipping validation)",
 			makeConfig: func(t *testing.T) *DepositConfig {
 				genesisValidatorsRoot, err := hex.DecodeString(deadGenesisValidatorsRoot)
 				if err != nil {
@@ -180,15 +180,7 @@ func Test_EnsureDepositConfigIsValid(t *testing.T) {
 					},
 				}
 			},
-			error: fmt.Errorf(
-				"invalid chain config: %w",
-				fmt.Errorf(
-					"different genesis validators root on %s - want: 0x%s, got: 0x%s",
-					"mainnet",
-					config.MainnetGenesisValidatorsRoot,
-					deadGenesisValidatorsRoot,
-				),
-			),
+			error: nil,
 		},
 		{
 			name: "invalid config: invalid mnemonic language",
@@ -581,6 +573,90 @@ func Test_EnsureBLSToExecutionConfigIsValid(t *testing.T) {
 
 				if want1.Error() != got.Error() && want2.Error() != got.Error() {
 					t.Fatalf("invalid error\nwant: %v\ngot:  %v", want1, got)
+				}
+			},
+		},
+		{
+			name: "invalid config: invalid validators root",
+			makeConfig: func(t *testing.T) *BLSToExecutionConfig {
+				var dead0 Address
+				if err := dead0.FromHex(deadAddress0); err != nil {
+					t.Fatal(err)
+				}
+				genesisForkVersion, err := hex.DecodeString(deadGenesisForkVersion)
+				if err != nil {
+					t.Fatal(err)
+				}
+				invalidGenesisValidatorsRoot, err := hex.DecodeString(deadGenesisValidatorsRoot + deadGenesisValidatorsRoot)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				return &BLSToExecutionConfig{
+					Config: &Config{
+						Number: 1,
+						ChainConfig: &config.ChainConfig{
+							Name:                  "devnet",
+							GenesisForkVersion:    genesisForkVersion,
+							GenesisValidatorsRoot: invalidGenesisValidatorsRoot,
+						},
+					},
+					ValidatorIndices:    &IndexedConfig[uint64]{Config: map[uint32]uint64{0: 0}},
+					WithdrawalAddresses: &IndexedConfigWithDefault[Address]{Default: dead0},
+				}
+			},
+			checkError: func(t *testing.T, got error) {
+				want := fmt.Errorf("invalid chain config: %w", ErrInvalidGenesisValidatorsRoot)
+				if got == nil {
+					t.Fatalf("want error %v, but got nil", want)
+				}
+
+				if want.Error() != got.Error() {
+					t.Fatalf("invalid error\nwant: %v\ngot:  %v", want, got)
+				}
+			},
+		},
+		{
+			name: "invalid config: mainnet chain config with different validators root",
+			makeConfig: func(t *testing.T) *BLSToExecutionConfig {
+				var dead0 Address
+				if err := dead0.FromHex(deadAddress0); err != nil {
+					t.Fatal(err)
+				}
+				genesisValidatorsRoot, err := hex.DecodeString(deadGenesisValidatorsRoot)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				return &BLSToExecutionConfig{
+					Config: &Config{
+						Number: 1,
+						ChainConfig: &config.ChainConfig{
+							Name:                  "mainnet",
+							GenesisValidatorsRoot: genesisValidatorsRoot,
+						},
+					},
+					ValidatorIndices:    &IndexedConfig[uint64]{Config: map[uint32]uint64{0: 0}},
+					WithdrawalAddresses: &IndexedConfigWithDefault[Address]{Default: dead0},
+				}
+			},
+			checkError: func(t *testing.T, got error) {
+				want := fmt.Errorf(
+					"invalid chain config: %w",
+					fmt.Errorf(
+						"different genesis validators root on %s - want: 0x%s, got: 0x%s",
+						"mainnet",
+						config.MainnetGenesisValidatorsRoot,
+						deadGenesisValidatorsRoot,
+					),
+				)
+
+				if got == nil {
+					t.Fatalf("want error %v, but got nil", want)
+				}
+
+				if want.Error() != got.Error() {
+					t.Fatalf("invalid error\nwant: %v\ngot:  %v", want, got)
 				}
 			},
 		},

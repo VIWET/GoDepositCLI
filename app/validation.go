@@ -15,7 +15,7 @@ func EnsureBLSToExecutionConfigIsValid(cfg *BLSToExecutionConfig) error {
 		cfg.Config = new(Config)
 	}
 
-	if err := ensureConfigIsValid(cfg.Config); err != nil {
+	if err := ensureConfigIsValid(cfg.Config, false); err != nil {
 		return err
 	}
 
@@ -35,7 +35,7 @@ func EnsureBLSToExecutionConfigIsValid(cfg *BLSToExecutionConfig) error {
 	return nil
 }
 
-func ensureConfigIsValid(cfg *Config) error {
+func ensureConfigIsValid(cfg *Config, skipRootValidation bool) error {
 	if cfg.Number == 0 {
 		cfg.Number = 1
 	}
@@ -43,7 +43,7 @@ func ensureConfigIsValid(cfg *Config) error {
 	if cfg.ChainConfig == nil {
 		cfg.ChainConfig = config.MainnetConfig()
 	}
-	if err := ensureChainConfigIsValid(cfg.ChainConfig); err != nil {
+	if err := ensureChainConfigIsValid(cfg.ChainConfig, skipRootValidation); err != nil {
 		return fmt.Errorf("invalid chain config: %w", err)
 	}
 
@@ -61,14 +61,17 @@ func ensureConfigIsValid(cfg *Config) error {
 	return nil
 }
 
-// TODO(viwet): make GenesisValidatorsRoot validation optional
-func ensureChainConfigIsValid(cfg *config.ChainConfig) error {
+func ensureChainConfigIsValid(cfg *config.ChainConfig, skipRootValidation bool) error {
 	if knownConfig, ok := config.ConfigByNetworkName(cfg.Name); ok {
-		return ensureKnownChainConfigIsValid(cfg, knownConfig)
+		return ensureKnownChainConfigIsValid(cfg, knownConfig, skipRootValidation)
 	}
 
 	if len(cfg.GenesisForkVersion) != config.ForkVersionLength {
 		return ErrInvalidGenesisForkVersion
+	}
+
+	if skipRootValidation {
+		return nil
 	}
 
 	if len(cfg.GenesisValidatorsRoot) != config.HashLength {
@@ -78,7 +81,7 @@ func ensureChainConfigIsValid(cfg *config.ChainConfig) error {
 	return nil
 }
 
-func ensureKnownChainConfigIsValid(cfg, knownConfig *config.ChainConfig) error {
+func ensureKnownChainConfigIsValid(cfg, knownConfig *config.ChainConfig, skipRootValidation bool) error {
 	if len(cfg.GenesisForkVersion) == 0 {
 		cfg.GenesisForkVersion = knownConfig.GenesisForkVersion
 	} else if !bytes.Equal(cfg.GenesisForkVersion, knownConfig.GenesisForkVersion) {
@@ -88,6 +91,10 @@ func ensureKnownChainConfigIsValid(cfg, knownConfig *config.ChainConfig) error {
 			knownConfig.GenesisForkVersion,
 			cfg.GenesisForkVersion,
 		)
+	}
+
+	if skipRootValidation {
+		return nil
 	}
 
 	if len(cfg.GenesisValidatorsRoot) == 0 {

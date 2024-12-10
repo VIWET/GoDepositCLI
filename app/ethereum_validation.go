@@ -8,7 +8,7 @@ func EnsureDepositConfigIsValid(cfg *DepositConfig) error {
 		cfg.Config = new(Config)
 	}
 
-	if err := ensureConfigIsValid(cfg.Config); err != nil {
+	if err := ensureConfigIsValid(cfg.Config, true); err != nil {
 		return err
 	}
 
