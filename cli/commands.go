@@ -3,6 +3,8 @@ package cli
 import "github.com/urfave/cli/v2"
 
 var (
+	commands = []*cli.Command{DepositCommand, BLSToExecutionCommand}
+
 	NewMnemonicCommand = &cli.Command{
 		Name:    "new-mnemonic",
 		Aliases: []string{"new"},
@@ -26,5 +28,12 @@ var (
 			NewMnemonicCommand,
 			ExistingMnemonicCommand,
 		},
+	}
+
+	BLSToExecutionCommand = &cli.Command{
+		Name:   "bls-to-execution",
+		Usage:  "Generate BLS to Execution transition messages from existing mnemonic",
+		Flags:  blsToExecutionFlags,
+		Action: GenerateBLSToExecution,
 	}
 )

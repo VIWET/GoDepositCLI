@@ -87,4 +87,24 @@ var (
 		Usage:   "Path to config file",
 		Aliases: []string{"cfg"},
 	}
+
+	ValidatorIndicesFlag = &cli.StringSliceFlag{
+		Name:    "validator-indices",
+		Usage:   "Indices to generate bls to execution messages",
+		Aliases: []string{"validator-index", "indices", "vi"},
+	}
 )
+
+var blsToExecutionFlags = []cli.Flag{
+	ConfigFlag,
+
+	StartIndexFlag,
+	NumberFlag,
+	ChainNameFlag,
+	ChainGenesisForkVersionFlag,
+	ChainGenesisValidatorsRootFlag,
+	MnemonicLanguageFlag,
+	DirectoryFlag,
+	WithdrawalAddressesFlag,
+	ValidatorIndicesFlag,
+}

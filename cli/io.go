@@ -132,6 +132,19 @@ func saveKeystore(keystore *keystore.Keystore, dir string) error {
 	return encoder.Encode(keystore)
 }
 
+func saveBLSToExecution(messages []*types.SignedBLSToExecution, dir string) error {
+	filePath := blsToExecutionPath(dir)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, FilePermission)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(messages)
+}
+
 func depositsFilePath(dir string) string {
 	return path.Join(dir, fmt.Sprintf("deposit_data-%d.json", time.Now().Unix()))
 }
@@ -139,4 +152,8 @@ func depositsFilePath(dir string) string {
 func keystoreFilePath(dir string, keyPath string) string {
 	pathSuffix := strings.TrimPrefix(strings.ReplaceAll(keyPath, "/", "_"), "m")
 	return path.Join(dir, fmt.Sprintf("keystore%s.json", pathSuffix))
+}
+
+func blsToExecutionPath(dir string) string {
+	return path.Join(dir, fmt.Sprintf("bls_to_execution-%d.json", time.Now().Unix()))
 }
