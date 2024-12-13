@@ -4,67 +4,14 @@ package cli
 
 import (
 	"encoding/hex"
-	"fmt"
 	"strings"
 
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
-	"github.com/viwet/GoDepositCLI/helpers"
 )
 
-func (b *DepositConfigBuilder) ContractAddresses(addresses ...string) *DepositConfigBuilder {
-	b.contractAddresses = append(b.contractAddresses, addresses...)
-	return b
-}
-
-func (b *DepositConfigBuilder) build() error {
-	if err := b.buildAmounts(); err != nil {
-		return err
-	}
-
-	if err := b.buildWithdrawalAddresses(); err != nil {
-		return err
-	}
-
-	if err := b.buildContractAddresses(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (b *DepositConfigBuilder) buildContractAddresses() error {
-	if len(b.contractAddresses) == 0 {
-		return nil
-	}
-
-	b.cfg.ContractAddresses = &app.IndexedConfig[app.Address]{
-		Config: make(map[uint32]app.Address),
-	}
-
-	onDefault := func(address string) error {
-		return fmt.Errorf("invalid contract addresses config: default contract address %s is not allowed", address)
-	}
-
-	onIndexed := func(index uint32, address string) error {
-		var a app.Address
-		if err := a.FromHex(address); err != nil {
-			return err
-		}
-
-		b.cfg.ContractAddresses.Config[index] = a
-		return nil
-	}
-
-	if err := helpers.ParseIndexedValues(onDefault, onIndexed, b.amounts...); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func newDepositConfigFromFlags(ctx *cli.Context) (*app.DepositConfig, error) {
-	builder := NewDepositConfigBuilder()
+	builder := app.NewDepositConfigBuilder()
 
 	builder.StartIndex(uint32(ctx.Uint(StartIndexFlag.Name)))
 	builder.Number(uint32(ctx.Uint(NumberFlag.Name)))
