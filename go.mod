@@ -3,6 +3,8 @@ module github.com/viwet/GoDepositCLI
 go 1.23.3
 
 require (
+	github.com/charmbracelet/bubbletea v1.2.4
+	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/supranational/blst v0.3.13
 	github.com/viwet/GoBIP39 v1.0.0
 	golang.org/x/crypto v0.29.0
@@ -10,8 +12,6 @@ require (
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/charmbracelet/bubbletea v1.2.4 // indirect
-	github.com/charmbracelet/lipgloss v1.0.0 // indirect
 	github.com/charmbracelet/x/ansi v0.6.0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect

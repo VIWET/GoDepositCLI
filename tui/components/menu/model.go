@@ -17,7 +17,7 @@ type Model struct {
 	help    help.Model
 }
 
-func New(title string, options ...Option) tea.Model {
+func New(title string, options ...Option) Model {
 	return Model{
 		title:   title,
 		options: options,
@@ -66,19 +66,19 @@ func renderTitle(title string) string {
 }
 
 func renderOptions(options []Option, focused int) string {
-	opts := make([]string, len(options))
+	views := make([]string, len(options))
 	for i, opt := range options {
 		if i == focused {
-			opts[i] = renderSelected(opt)
+			views[i] = renderSelected(opt)
 		} else {
-			opts[i] = renderDefault(opt)
+			views[i] = renderDefault(opt)
 		}
 	}
 
 	return optionsSectionContainerStyle.Render(
 		lipgloss.JoinVertical(
 			lipgloss.Left,
-			opts...,
+			views...,
 		),
 	)
 }
