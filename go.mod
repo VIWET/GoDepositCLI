@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/supranational/blst v0.3.13
 	github.com/viwet/GoBIP39 v1.0.0
-	golang.org/x/crypto v0.29.0
+	golang.org/x/crypto v0.31.0
 )
 
 require (
@@ -42,6 +42,6 @@ require (
 	github.com/urfave/cli/v2 v2.27.5
 	github.com/viwet/GoBLS12381 v1.0.0
 	github.com/viwet/GoKeystoreV4 v1.0.1
-	golang.org/x/term v0.26.0
+	golang.org/x/term v0.27.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

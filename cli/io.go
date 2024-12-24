@@ -13,13 +13,21 @@ import (
 
 	"github.com/urfave/cli/v2"
 	bip39 "github.com/viwet/GoBIP39"
+	"github.com/viwet/GoDepositCLI/app"
+	"github.com/viwet/GoDepositCLI/tui"
+	"github.com/viwet/GoDepositCLI/tui/components/mnemonic"
 	"github.com/viwet/GoDepositCLI/types"
 	keystore "github.com/viwet/GoKeystoreV4"
 	"golang.org/x/term"
 )
 
-func ShowMnemonic(mnemonic []string) {
-	fmt.Println(strings.Join(mnemonic, " "))
+func ShowMnemonic(ctx *cli.Context, state *app.State[app.DepositConfig]) error {
+	if ctx.Bool(NonInteractiveFlag.Name) {
+		fmt.Println(strings.Join(state.Mnemonic(), " "))
+		return nil
+	}
+
+	return tui.Run(mnemonic.New(state))
 }
 
 func ReadPassword(ctx *cli.Context) (string, error) {

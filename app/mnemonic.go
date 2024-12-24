@@ -8,7 +8,8 @@ import (
 )
 
 // GenerateMnemonic generates new seed phrase
-func GenerateMnemonic(cfg *MnemonicConfig) ([]string, words.List, error) {
+func GenerateMnemonic(state *State[DepositConfig]) ([]string, words.List, error) {
+	cfg := state.Config().MnemonicConfig
 	entropy, err := bip39.NewEntropy(cfg.Bitlen)
 	if err != nil {
 		return nil, nil, err

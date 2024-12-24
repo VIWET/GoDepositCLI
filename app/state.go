@@ -29,6 +29,14 @@ func (s *State[Config]) WithPassword(password string) *State[Config] {
 	return s
 }
 
+func (s *State[Config]) Mnemonic() []string {
+	return s.mnemonic
+}
+
+func (s *State[Config]) Words() words.List {
+	return s.list
+}
+
 func (s *State[Config]) Config() *Config {
 	return s.cfg
 }
