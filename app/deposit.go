@@ -12,7 +12,14 @@ import (
 )
 
 // GenerateDeposits generates all deposits and keystores according to the config
-func GenerateDeposits(cfg *DepositConfig, mnemonic []string, list words.List, password string) ([]*types.Deposit, []*keystore.Keystore, error) {
+func GenerateDeposits(state *State[DepositConfig]) ([]*types.Deposit, []*keystore.Keystore, error) {
+	var (
+		cfg      *DepositConfig = state.cfg
+		mnemonic []string       = state.mnemonic
+		list     words.List     = state.list
+		password string         = state.password
+	)
+
 	seed, err := bip39.ExtractSeed(mnemonic, list, "")
 	if err != nil {
 		return nil, nil, err

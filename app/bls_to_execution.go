@@ -4,13 +4,18 @@ import (
 	"fmt"
 
 	bip39 "github.com/viwet/GoBIP39"
-	"github.com/viwet/GoBIP39/words"
 	bls12381 "github.com/viwet/GoBLS12381"
 	"github.com/viwet/GoDepositCLI/types"
 )
 
 // GenerateDeposits generates all bls to execution messages according to the config
-func GenerateBLSToExecutionMessages(cfg *BLSToExecutionConfig, mnemonic []string, list words.List) ([]*types.SignedBLSToExecution, error) {
+func GenerateBLSToExecutionMessages(state *State[BLSToExecutionConfig]) ([]*types.SignedBLSToExecution, error) {
+	var (
+		cfg      = state.cfg
+		mnemonic = state.mnemonic
+		list     = state.list
+	)
+
 	seed, err := bip39.ExtractSeed(mnemonic, list, "")
 	if err != nil {
 		return nil, err

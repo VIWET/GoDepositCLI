@@ -3,6 +3,7 @@ module github.com/viwet/GoDepositCLI
 go 1.23.3
 
 require (
+	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/supranational/blst v0.3.13
@@ -12,7 +13,7 @@ require (
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/charmbracelet/x/ansi v0.6.0 // indirect
+	github.com/charmbracelet/x/ansi v0.4.5 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
@@ -33,7 +34,6 @@ require (
 )
 
 require (
-	github.com/charmbracelet/bubbles v0.20.0
 	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/ferranbt/fastssz v0.1.4
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
