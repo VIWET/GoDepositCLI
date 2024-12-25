@@ -2,7 +2,6 @@ package cli
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,10 +15,12 @@ import (
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
 	"github.com/viwet/GoDepositCLI/tui/components/mnemonic"
+	"github.com/viwet/GoDepositCLI/tui/components/password"
 	"github.com/viwet/GoDepositCLI/types"
 	keystore "github.com/viwet/GoKeystoreV4"
-	"golang.org/x/term"
 )
+
+// TODO(viwet): merge IO operations with TUI in single function
 
 func ShowMnemonic(ctx *cli.Context, state *app.State[app.DepositConfig]) error {
 	if ctx.Bool(NonInteractiveFlag.Name) {
@@ -33,30 +34,16 @@ func ShowMnemonic(ctx *cli.Context, state *app.State[app.DepositConfig]) error {
 func ReadPassword(ctx *cli.Context) (string, error) {
 	if ctx.IsSet(PasswordFlag.Name) {
 		return ctx.String(PasswordFlag.Name), nil
+	} else if ctx.Bool(NonInteractiveFlag.Name) {
+		return "", errors.New("cannot read password in non-interactive mode")
 	}
 
-	return scanPassword()
-}
-
-func scanPassword() (string, error) {
-	for {
-		fmt.Println("Enter new password:")
-		password, err := term.ReadPassword(int(os.Stdin.Fd()))
-		if err != nil {
-			return "", err
-		}
-
-		fmt.Println("Confirm your password:")
-		confirm, err := term.ReadPassword(int(os.Stdin.Fd()))
-		if err != nil {
-			return "", err
-		}
-
-		if bytes.Equal(password, confirm) {
-			return string(password), nil
-		}
-		fmt.Println("Passwords are not equal, try again!")
+	password := password.New()
+	if err := tui.Run(password); err != nil {
+		return "", err
 	}
+
+	return password.Value(), nil
 }
 
 func ReadMnemonic(ctx *cli.Context) ([]string, error) {

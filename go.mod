@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/x/ansi v0.4.5 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
@@ -42,6 +43,5 @@ require (
 	github.com/urfave/cli/v2 v2.27.5
 	github.com/viwet/GoBLS12381 v1.0.0
 	github.com/viwet/GoKeystoreV4 v1.0.1
-	golang.org/x/term v0.27.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
