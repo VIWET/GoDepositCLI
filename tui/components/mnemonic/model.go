@@ -1,6 +1,7 @@
 package mnemonic
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -10,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/viwet/GoDepositCLI/app"
+	"github.com/viwet/GoDepositCLI/tui"
 )
 
 const columns = 3
@@ -21,35 +23,35 @@ type Model struct {
 	help    help.Model
 }
 
-func New(state *app.State[app.DepositConfig]) Model {
-	return Model{
+func New(state *app.State[app.DepositConfig]) *Model {
+	return &Model{
 		state:   state,
 		binding: newBindings(),
 		help:    help.New(),
 	}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.binding.toggle):
 			m.show = !m.show
 		case key.Matches(msg, m.binding.accept):
-			return m, tea.Quit
+			return m, tui.Quit()
 		case key.Matches(msg, m.binding.quit):
-			return m, tea.Quit
+			return m, tui.QuitWithError(errors.New("mnemonic wasn't accepted"))
 		}
 	}
 
 	return m, nil
 }
 
-func (m Model) View() string {
+func (m *Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
 		renderTitle("Mnemonic"),
@@ -62,7 +64,7 @@ func renderTitle(title string) string {
 	return titleStyle.Render(title)
 }
 
-func (m Model) renderMnemonic() string {
+func (m *Model) renderMnemonic() string {
 	mnemonic, words := m.state.Mnemonic(), m.state.Words()
 	return mnemonicSectionContainerStyle.Render(
 		lipgloss.JoinVertical(

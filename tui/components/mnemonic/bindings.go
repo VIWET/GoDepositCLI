@@ -10,14 +10,14 @@ type bindings struct {
 
 func newBindings() bindings {
 	return bindings{
-		toggle: key.NewBinding(key.WithKeys(" "), key.WithHelp("space", "show/hide mnemonic")),
+		toggle: key.NewBinding(key.WithKeys("ctrl+t"), key.WithHelp("ctrl+t", "show/hide mnemonic")),
 		accept: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "accept")),
-		quit:   key.NewBinding(key.WithKeys("q", "esc", "ctrl+c"), key.WithHelp("q", "quit")),
+		quit:   key.NewBinding(key.WithKeys("ctrl+c")),
 	}
 }
 
 func (b bindings) ShortHelp() []key.Binding {
-	return []key.Binding{b.toggle, b.accept, b.quit}
+	return []key.Binding{b.toggle, b.accept}
 }
 
 func (b bindings) FullHelp() [][]key.Binding {
