@@ -3,6 +3,7 @@ package password
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -39,7 +40,6 @@ func newInput() textinput.Model {
 	input := textinput.New()
 	input.EchoMode = textinput.EchoPassword
 	input.Prompt = ""
-	input.Width = 64
 	input.CharLimit = 64
 	return input
 }
@@ -120,9 +120,11 @@ func (m *Model) updateConfirm(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
-// TODO(viwet): validate passwords properly
-
 func (m *Model) isValidPassword() bool {
+	if strings.TrimSpace(m.password.Value()) == "" {
+		m.passwordErr = errors.New("Password cannot contain only blank spaces")
+		return false
+	}
 	if utf8.RuneCountInString(m.password.Value()) < MinPasswordLength {
 		m.passwordErr = errors.New("Password must be at least 8 characters")
 		return false

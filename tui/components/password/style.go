@@ -20,5 +20,5 @@ var (
 
 	focusedInputColor = lipgloss.Color("#f6359a")
 
-	errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#DB2842"))
+	errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#DB2842")).Padding(0, 0, 0, 2)
 )
