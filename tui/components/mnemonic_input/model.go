@@ -37,7 +37,7 @@ func newInput() textinput.Model {
 	input.Prompt = ""
 	input.Width = 15
 	input.CharLimit = 15
-	input.KeyMap = inputBinding
+	input.KeyMap = inputBinding(textinput.DefaultKeyMap)
 	input.Validate = func(value string) error {
 		if strings.Contains(value, " ") {
 			return errors.New("paste is not allowed")
@@ -131,9 +131,10 @@ func (m *Model) View() string {
 
 func (m *Model) updateInput(msg tea.Msg) tea.Cmd {
 	var (
-		cmds   []tea.Cmd
-		inputs = m.input
-		offset = 0
+		cmds     []tea.Cmd
+		inputs   = m.input
+		offset   = 0
+		nonEmpty = 0
 	)
 
 	for i := range len(m.input) {
@@ -162,8 +163,20 @@ func (m *Model) updateInput(msg tea.Msg) tea.Cmd {
 		} else {
 			inputs[i] = input
 		}
+
+		if inputs[i].Value() != "" {
+			nonEmpty++
+		}
+
 		cmds = append(cmds, cmd)
 	}
+
+	if nonEmpty%3 == 0 && nonEmpty >= 12 && nonEmpty <= 24 {
+		m.binding.accept.SetEnabled(true)
+	} else {
+		m.binding.accept.SetEnabled(false)
+	}
+
 	m.input = inputs
 	return tea.Batch(cmds...)
 }

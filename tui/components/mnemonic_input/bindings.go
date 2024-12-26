@@ -24,26 +24,36 @@ func newBindings() bindings {
 		prev:      key.NewBinding(key.WithKeys("ctrl+p"), key.WithHelp("ctrl+p", "prev word")),
 		space:     key.NewBinding(key.WithKeys(" ")),
 		backspace: key.NewBinding(key.WithKeys("backspace")),
-		accept:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "confirm")),
+		accept:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "confirm"), key.WithDisabled()),
 		quit:      key.NewBinding(key.WithKeys("ctrl+c")),
-
-		disablePaste: key.NewBinding(key.WithKeys("ctrl+v", "alt+v")),
 	}
 }
 
 func (b bindings) ShortHelp() []key.Binding {
-	return []key.Binding{b.toggle, b.accept, b.next, b.prev}
+	return []key.Binding{b.toggle, b.next, b.prev, b.accept}
 }
 
 func (b bindings) FullHelp() [][]key.Binding {
 	return [][]key.Binding{b.ShortHelp()}
 }
 
-var inputBinding = textinput.KeyMap{
-	DeleteWordBackward:      key.NewBinding(key.WithKeys("alt+backspace", "ctrl+w")),
-	DeleteWordForward:       key.NewBinding(key.WithKeys("alt+delete", "alt+d")),
-	DeleteAfterCursor:       key.NewBinding(key.WithKeys("ctrl+k")),
-	DeleteBeforeCursor:      key.NewBinding(key.WithKeys("ctrl+u")),
-	DeleteCharacterBackward: key.NewBinding(key.WithKeys("backspace", "ctrl+h")),
-	DeleteCharacterForward:  key.NewBinding(key.WithKeys("delete", "ctrl+d")),
+func inputBinding(bindings textinput.KeyMap) textinput.KeyMap {
+	bindings.CharacterForward.SetEnabled(false)
+	bindings.CharacterBackward.SetEnabled(false)
+	bindings.WordForward.SetEnabled(false)
+	bindings.WordBackward.SetEnabled(false)
+	bindings.DeleteWordBackward.SetEnabled(true)
+	bindings.DeleteWordForward.SetEnabled(true)
+	bindings.DeleteAfterCursor.SetEnabled(true)
+	bindings.DeleteBeforeCursor.SetEnabled(true)
+	bindings.DeleteCharacterBackward.SetEnabled(true)
+	bindings.DeleteCharacterForward.SetEnabled(true)
+	bindings.LineStart.SetEnabled(false)
+	bindings.LineEnd.SetEnabled(false)
+	bindings.Paste.SetEnabled(true)
+	bindings.AcceptSuggestion.SetEnabled(false)
+	bindings.NextSuggestion.SetEnabled(false)
+	bindings.PrevSuggestion.SetEnabled(false)
+
+	return bindings
 }
