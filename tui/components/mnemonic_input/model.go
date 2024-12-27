@@ -36,7 +36,6 @@ func newInput() textinput.Model {
 	input.EchoMode = textinput.EchoPassword
 	input.Prompt = ""
 	input.Width = 15
-	input.CharLimit = 15
 	input.KeyMap = inputBinding(textinput.DefaultKeyMap)
 	input.Validate = func(value string) error {
 		if strings.Contains(value, " ") {
@@ -48,7 +47,12 @@ func newInput() textinput.Model {
 }
 
 func (m *Model) Mnemonic() string {
-	return ""
+	mnemonic := make([]string, len(m.input))
+	for i := range m.input {
+		mnemonic[i] = m.input[i].Value()
+	}
+
+	return strings.Join(mnemonic, " ")
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -162,6 +166,11 @@ func (m *Model) updateInput(msg tea.Msg) tea.Cmd {
 			m.focused = i + len(words) - 1
 		} else {
 			inputs[i] = input
+		}
+		
+		if len([]rune(inputs[i].Value())) > 15 {
+			value := inputs[i].Value()
+			inputs[i].SetValue(string(value[:15]))
 		}
 
 		if inputs[i].Value() != "" {
