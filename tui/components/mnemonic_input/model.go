@@ -46,7 +46,7 @@ func newInput() textinput.Model {
 	return input
 }
 
-func (m *Model) Mnemonic() string {
+func (m *Model) Value() string {
 	mnemonic := make([]string, len(m.input))
 	for i := range m.input {
 		mnemonic[i] = m.input[i].Value()
