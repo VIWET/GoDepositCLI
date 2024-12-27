@@ -105,6 +105,8 @@ make NETWORK=ethereum
 
 	The password, that will be used for keystore encryption. If `--password` is not set, `staking-cli` will ask you to enter it.
 
+    NOTE: If you are using `--non-interactive` flag - this is a mandatory option
+
 - `--config`
 
 	Aliases: `--cfg`
@@ -170,6 +172,8 @@ make NETWORK=ethereum
 - `--mnemonic`
 
     The seed phrase that will be used for keys generation. If `--mnemonic` is not set, `staking-cli` will ask you to enter it.
+
+    NOTE: If you are using `--non-interactive` flag - this is a mandatory option
 
 ### Example
 
