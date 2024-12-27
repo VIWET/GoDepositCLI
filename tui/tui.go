@@ -8,7 +8,7 @@ type Model struct {
 }
 
 func (m *Model) Init() tea.Cmd {
-	return m.model.Init()
+	return tea.Batch(tea.ClearScreen, m.model.Init())
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -39,7 +39,6 @@ func Run(model tea.Model) error {
 	appModel := newModel(model)
 	if _, err := tea.NewProgram(
 		appModel,
-		tea.WithAltScreen(),
 		tea.WithFilter(appModel.filter),
 	).Run(); err != nil {
 		return err
