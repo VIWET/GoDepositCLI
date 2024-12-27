@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,6 +14,7 @@ import (
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
 	"github.com/viwet/GoDepositCLI/tui/components/mnemonic"
+	mnemonicInput "github.com/viwet/GoDepositCLI/tui/components/mnemonic_input"
 	"github.com/viwet/GoDepositCLI/tui/components/password"
 	"github.com/viwet/GoDepositCLI/types"
 	keystore "github.com/viwet/GoKeystoreV4"
@@ -35,7 +35,7 @@ func ReadPassword(ctx *cli.Context) (string, error) {
 	if ctx.IsSet(PasswordFlag.Name) {
 		return ctx.String(PasswordFlag.Name), nil
 	} else if ctx.Bool(NonInteractiveFlag.Name) {
-		return "", errors.New("cannot read password in non-interactive mode")
+		return "", errors.New("cannot read password in non-interactive mode, --password flag must be set")
 	}
 
 	password := password.New()
@@ -49,21 +49,16 @@ func ReadPassword(ctx *cli.Context) (string, error) {
 func ReadMnemonic(ctx *cli.Context) ([]string, error) {
 	if ctx.IsSet(MnemonicFlag.Name) {
 		return bip39.SplitMnemonic(strings.TrimSpace(ctx.String(MnemonicFlag.Name))), nil
+	} else if ctx.Bool(NonInteractiveFlag.Name) {
+		return nil, errors.New("cannot read mnemonic in non-interactive mode, --mnemonic flag must be set")
 	}
 
-	return scanMnemonic()
-}
-
-func scanMnemonic() ([]string, error) {
-	fmt.Println("Enter your mnemonic")
-	reader := bufio.NewReader(os.Stdin)
-	mnemonic, err := reader.ReadString('\n')
-	if err != nil {
+	mnemonic := mnemonicInput.New()
+	if err := tui.Run(mnemonic); err != nil {
 		return nil, err
 	}
 
-	mnemonic = strings.TrimSpace(mnemonic)
-	return bip39.SplitMnemonic(mnemonic), nil
+	return bip39.SplitMnemonic(mnemonic.Value()), nil
 }
 
 const (
