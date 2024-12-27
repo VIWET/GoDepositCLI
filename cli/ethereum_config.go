@@ -10,20 +10,8 @@ import (
 	"github.com/viwet/GoDepositCLI/app"
 )
 
-func (b *DepositConfigBuilder) build() error {
-	if err := b.buildAmounts(); err != nil {
-		return err
-	}
-
-	if err := b.buildWithdrawalAddresses(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func newDepositConfigFromFlags(ctx *cli.Context) (*app.DepositConfig, error) {
-	builder := NewDepositConfigBuilder()
+	builder := app.NewDepositConfigBuilder()
 
 	builder.StartIndex(uint32(ctx.Uint(StartIndexFlag.Name)))
 	builder.Number(uint32(ctx.Uint(NumberFlag.Name)))

@@ -86,7 +86,9 @@ func Test_GenerateDeposits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	deposits, keystores, err := GenerateDeposits(cfg, mnemonic, list, password)
+	state := NewState(cfg).WithMnemonic(mnemonic, list).WithPassword(password)
+
+	deposits, keystores, err := GenerateDeposits(state)
 	if err != nil {
 		t.Fatal(err)
 	}

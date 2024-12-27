@@ -3,6 +3,11 @@ package cli
 import "github.com/urfave/cli/v2"
 
 var (
+	NonInteractiveFlag = &cli.BoolFlag{
+		Name:  "non-interactive",
+		Value: false,
+	}
+
 	StartIndexFlag = &cli.UintFlag{
 		Name:    "start-index",
 		Usage:   "Key index from which deposits generation starts",

@@ -2,7 +2,6 @@ package cli
 
 import (
 	"github.com/urfave/cli/v2"
-	"github.com/viwet/GoBIP39/words"
 	"github.com/viwet/GoDepositCLI/app"
 )
 
@@ -12,23 +11,23 @@ func GenerateDepositsFromNewMnemonic(ctx *cli.Context) error {
 		return err
 	}
 
-	mnemonic, list, err := app.GenerateMnemonic(cfg.MnemonicConfig)
+	state := app.NewState(cfg)
+	mnemonic, list, err := app.GenerateMnemonic(state)
 	if err != nil {
 		return err
 	}
 
-	ShowMnemonic(mnemonic)
+	state.WithMnemonic(mnemonic, list)
+	if err := ShowMnemonic(ctx, state); err != nil {
+		return err
+	}
+
 	password, err := ReadPassword(ctx)
 	if err != nil {
 		return err
 	}
 
-	return generateDeposits(
-		cfg,
-		mnemonic,
-		list,
-		password,
-	)
+	return generateDeposits(state.WithPassword(password))
 }
 
 func GenerateDepositsFromExistingMnemonic(ctx *cli.Context) error {
@@ -48,19 +47,19 @@ func GenerateDepositsFromExistingMnemonic(ctx *cli.Context) error {
 	}
 
 	return generateDeposits(
-		cfg,
-		mnemonic,
-		app.LanguageFromMnemonicConfig(cfg.MnemonicConfig),
-		password,
+		app.NewState(cfg).
+			WithMnemonic(mnemonic, app.LanguageFromMnemonicConfig(cfg.MnemonicConfig)).
+			WithPassword(password),
 	)
 }
 
-func generateDeposits(cfg *app.DepositConfig, mnemonic []string, list words.List, password string) error {
-	deposits, keystores, err := app.GenerateDeposits(cfg, mnemonic, list, password)
+func generateDeposits(state *app.State[app.DepositConfig]) error {
+	deposits, keystores, err := app.GenerateDeposits(state)
 	if err != nil {
 		return err
 	}
 
+	cfg := state.Config()
 	if err := ensureDirectoryExist(cfg.Directory); err != nil {
 		return err
 	}

@@ -7,6 +7,7 @@ import (
 
 func NewApp() *cli.App {
 	app := cli.NewApp()
+	app.Flags = []cli.Flag{NonInteractiveFlag}
 	app.Name = "staking-cli"
 	app.Version = version.Version()
 	app.Commands = commands

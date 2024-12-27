@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,62 +11,54 @@ import (
 
 	"github.com/urfave/cli/v2"
 	bip39 "github.com/viwet/GoBIP39"
+	"github.com/viwet/GoDepositCLI/app"
+	"github.com/viwet/GoDepositCLI/tui"
+	"github.com/viwet/GoDepositCLI/tui/components/mnemonic"
+	mnemonicInput "github.com/viwet/GoDepositCLI/tui/components/mnemonic_input"
+	"github.com/viwet/GoDepositCLI/tui/components/password"
 	"github.com/viwet/GoDepositCLI/types"
 	keystore "github.com/viwet/GoKeystoreV4"
-	"golang.org/x/term"
 )
 
-func ShowMnemonic(mnemonic []string) {
-	fmt.Println(strings.Join(mnemonic, " "))
+// TODO(viwet): merge IO operations with TUI in single function
+
+func ShowMnemonic(ctx *cli.Context, state *app.State[app.DepositConfig]) error {
+	if ctx.Bool(NonInteractiveFlag.Name) {
+		fmt.Println(strings.Join(state.Mnemonic(), " "))
+		return nil
+	}
+
+	return tui.Run(mnemonic.New(state))
 }
 
 func ReadPassword(ctx *cli.Context) (string, error) {
 	if ctx.IsSet(PasswordFlag.Name) {
 		return ctx.String(PasswordFlag.Name), nil
+	} else if ctx.Bool(NonInteractiveFlag.Name) {
+		return "", errors.New("cannot read password in non-interactive mode, --password flag must be set")
 	}
 
-	return scanPassword()
-}
-
-func scanPassword() (string, error) {
-	for {
-		fmt.Println("Enter new password:")
-		password, err := term.ReadPassword(int(os.Stdin.Fd()))
-		if err != nil {
-			return "", err
-		}
-
-		fmt.Println("Confirm your password:")
-		confirm, err := term.ReadPassword(int(os.Stdin.Fd()))
-		if err != nil {
-			return "", err
-		}
-
-		if bytes.Equal(password, confirm) {
-			return string(password), nil
-		}
-		fmt.Println("Passwords are not equal, try again!")
+	password := password.New()
+	if err := tui.Run(password); err != nil {
+		return "", err
 	}
+
+	return password.Value(), nil
 }
 
 func ReadMnemonic(ctx *cli.Context) ([]string, error) {
 	if ctx.IsSet(MnemonicFlag.Name) {
 		return bip39.SplitMnemonic(strings.TrimSpace(ctx.String(MnemonicFlag.Name))), nil
+	} else if ctx.Bool(NonInteractiveFlag.Name) {
+		return nil, errors.New("cannot read mnemonic in non-interactive mode, --mnemonic flag must be set")
 	}
 
-	return scanMnemonic()
-}
-
-func scanMnemonic() ([]string, error) {
-	fmt.Println("Enter your mnemonic")
-	reader := bufio.NewReader(os.Stdin)
-	mnemonic, err := reader.ReadString('\n')
-	if err != nil {
+	mnemonic := mnemonicInput.New()
+	if err := tui.Run(mnemonic); err != nil {
 		return nil, err
 	}
 
-	mnemonic = strings.TrimSpace(mnemonic)
-	return bip39.SplitMnemonic(mnemonic), nil
+	return bip39.SplitMnemonic(mnemonic.Value()), nil
 }
 
 const (
