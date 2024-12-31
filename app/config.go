@@ -18,6 +18,8 @@ type Config struct {
 	MnemonicConfig *MnemonicConfig     `json:"mnemonic_config,omitempty"`
 
 	Directory string `json:"directory"`
+
+	EngineWorkers int `json:"-"`
 }
 
 // MnemonicConfig config
