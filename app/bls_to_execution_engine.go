@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"runtime"
 	"sync"
 
 	bip39 "github.com/viwet/GoBIP39"
@@ -79,7 +78,7 @@ func (e *BLSToExecutionEngine) generateMessages(ctx context.Context, indices <-c
 		mnemonic = e.mnemonic
 		list     = e.list
 
-		workers = max(1, min(cfg.EngineWorkers, runtime.NumCPU()))
+		workers = cfg.EngineWorkers
 		results = make(chan helpers.Result[*BLSToExecution], workers)
 	)
 

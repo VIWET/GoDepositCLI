@@ -57,6 +57,7 @@ func newDepositConfigFromFlags(ctx *cli.Context) (*app.DepositConfig, error) {
 	builder.MnemonicLanguage(ctx.String(MnemonicLanguageFlag.Name))
 	builder.MnemonicBitlen(ctx.Uint(MnemonicBitlenFlag.Name))
 	builder.Directory(ctx.String(DirectoryFlag.Name))
+	builder.EngineWorkers(ctx.Int(EngineWorkersFlag.Name))
 	builder.Amounts(ctx.StringSlice(AmountsFlag.Name)...)
 	builder.WithdrawalAddresses(ctx.StringSlice(WithdrawalAddressesFlag.Name)...)
 	builder.ContractAddresses(ctx.StringSlice(ContractAddressesFlag.Name)...)

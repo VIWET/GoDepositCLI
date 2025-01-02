@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"context"
+
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
 )
@@ -27,7 +29,7 @@ func GenerateDepositsFromNewMnemonic(ctx *cli.Context) error {
 		return err
 	}
 
-	return generateDeposits(state.WithPassword(password))
+	return generateDeposits(ctx.Context, state.WithPassword(password))
 }
 
 func GenerateDepositsFromExistingMnemonic(ctx *cli.Context) error {
@@ -47,14 +49,15 @@ func GenerateDepositsFromExistingMnemonic(ctx *cli.Context) error {
 	}
 
 	return generateDeposits(
+		ctx.Context,
 		app.NewState(cfg).
 			WithMnemonic(mnemonic, app.LanguageFromMnemonicConfig(cfg.MnemonicConfig)).
 			WithPassword(password),
 	)
 }
 
-func generateDeposits(state *app.State[app.DepositConfig]) error {
-	deposits, keystores, err := app.GenerateDeposits(state)
+func generateDeposits(ctx context.Context, state *app.State[app.DepositConfig]) error {
+	deposits, keystores, err := app.NewDepositEngine(state).Generate(ctx)
 	if err != nil {
 		return err
 	}

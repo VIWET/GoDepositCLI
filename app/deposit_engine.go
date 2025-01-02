@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"runtime"
 	"sync"
 
 	bip39 "github.com/viwet/GoBIP39"
@@ -83,7 +82,7 @@ func (e *DepositEngine) generateDeposits(ctx context.Context, indices <-chan uin
 		list     = e.list
 		password = e.password
 
-		workers = max(1, min(cfg.EngineWorkers, runtime.NumCPU()))
+		workers = cfg.EngineWorkers
 		results = make(chan helpers.Result[*Deposit], workers)
 	)
 

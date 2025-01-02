@@ -58,6 +58,10 @@ func ensureConfigIsValid(cfg *Config, skipRootValidation bool) error {
 		cfg.Directory = DefaultOutputDirectory
 	}
 
+	if cfg.EngineWorkers == 0 {
+		cfg.EngineWorkers = 1
+	}
+
 	return nil
 }
 

@@ -112,6 +112,7 @@ func newBLSToExecutionConfigFromFlags(ctx *cli.Context) (*app.BLSToExecutionConf
 
 	builder.MnemonicLanguage(ctx.String(MnemonicLanguageFlag.Name))
 	builder.Directory(ctx.String(DirectoryFlag.Name))
+	builder.EngineWorkers(ctx.Int(EngineWorkersFlag.Name))
 	builder.WithdrawalAddresses(ctx.StringSlice(WithdrawalAddressesFlag.Name)...)
 	builder.ValidatorIndices(ctx.StringSlice(ValidatorIndicesFlag.Name)...)
 
