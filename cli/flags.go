@@ -1,11 +1,20 @@
 package cli
 
-import "github.com/urfave/cli/v2"
+import (
+	"runtime"
+
+	"github.com/urfave/cli/v2"
+)
 
 var (
 	NonInteractiveFlag = &cli.BoolFlag{
 		Name:  "non-interactive",
 		Value: false,
+	}
+
+	EngineWorkersFlag = &cli.IntFlag{
+		Name:  "engine-workers",
+		Value: runtime.NumCPU(),
 	}
 
 	StartIndexFlag = &cli.UintFlag{

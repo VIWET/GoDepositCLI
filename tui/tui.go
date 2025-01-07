@@ -8,13 +8,20 @@ type Model struct {
 }
 
 func (m *Model) Init() tea.Cmd {
-	return tea.Batch(tea.ClearScreen, m.model.Init())
+	return m.model.Init()
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	model, cmd := m.model.Update(msg)
-	m.model = model
-	return m, cmd
+	switch msg := msg.(type) {
+	case quit:
+		m.err = msg.err
+		// TODO: make more elegant solution
+		return empty{}, tea.Quit
+	default:
+		model, cmd := m.model.Update(msg)
+		m.model = model
+		return m, cmd
+	}
 }
 
 func (m *Model) View() string {
@@ -25,22 +32,9 @@ func newModel(model tea.Model) *Model {
 	return &Model{model: model}
 }
 
-func (m *Model) filter(_ tea.Model, msg tea.Msg) tea.Msg {
-	switch msg := msg.(type) {
-	case quit:
-		m.err = msg.err
-		return tea.Quit()
-	default:
-		return msg
-	}
-}
-
 func Run(model tea.Model) error {
 	appModel := newModel(model)
-	if _, err := tea.NewProgram(
-		appModel,
-		tea.WithFilter(appModel.filter),
-	).Run(); err != nil {
+	if _, err := tea.NewProgram(appModel).Run(); err != nil {
 		return err
 	}
 
@@ -49,4 +43,18 @@ func Run(model tea.Model) error {
 	}
 
 	return nil
+}
+
+type empty struct{}
+
+func (e empty) Init() tea.Cmd {
+	return nil
+}
+
+func (e empty) Update(tea.Msg) (tea.Model, tea.Cmd) {
+	return e, nil
+}
+
+func (e empty) View() string {
+	return ""
 }

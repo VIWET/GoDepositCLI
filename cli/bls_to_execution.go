@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"context"
+
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
 )
@@ -19,11 +21,11 @@ func GenerateBLSToExecution(ctx *cli.Context) error {
 	state := app.NewState(cfg).
 		WithMnemonic(mnemonic, app.LanguageFromMnemonicConfig(cfg.MnemonicConfig))
 
-	return generateBLSToExecution(state)
+	return generateBLSToExecution(ctx.Context, state)
 }
 
-func generateBLSToExecution(state *app.State[app.BLSToExecutionConfig]) error {
-	messages, err := app.GenerateBLSToExecutionMessages(state)
+func generateBLSToExecution(ctx context.Context, state *app.State[app.BLSToExecutionConfig]) error {
+	messages, err := app.NewBLSToExecutionEngine(state).Generate(ctx)
 	if err != nil {
 		return err
 	}

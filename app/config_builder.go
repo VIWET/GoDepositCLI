@@ -101,6 +101,14 @@ func (b *DepositConfigBuilder) Directory(directory string) *DepositConfigBuilder
 	return b
 }
 
+func (b *DepositConfigBuilder) EngineWorkers(workers int) *DepositConfigBuilder {
+	if b.cfg.Config == nil {
+		b.cfg.Config = new(Config)
+	}
+	b.cfg.EngineWorkers = max(workers, 1)
+	return b
+}
+
 func (b *DepositConfigBuilder) Amounts(amounts ...string) *DepositConfigBuilder {
 	b.amounts = append(b.amounts, amounts...)
 	return b
@@ -206,6 +214,14 @@ func (b *BLSToExecutionConfigBuilder) Directory(directory string) *BLSToExecutio
 		b.cfg.Config = new(Config)
 	}
 	b.cfg.Directory = directory
+	return b
+}
+
+func (b *BLSToExecutionConfigBuilder) EngineWorkers(workers int) *BLSToExecutionConfigBuilder {
+	if b.cfg.Config == nil {
+		b.cfg.Config = new(Config)
+	}
+	b.cfg.EngineWorkers = max(workers, 1)
 	return b
 }
 
