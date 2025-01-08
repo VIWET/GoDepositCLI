@@ -78,11 +78,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch {
 			case m.password.Focused():
 				m.confirm.Reset()
+				m.confirmErr = nil
 				m.password.Reset()
+				m.passwordErr = nil
 				return m, nil
 			case m.confirm.Focused():
 				m.confirm.Reset()
 				m.confirm.Blur()
+				m.confirmErr = nil
 				return m, m.password.Focus()
 			}
 
