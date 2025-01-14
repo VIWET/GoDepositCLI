@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui/v2"
+	"github.com/viwet/GoDepositCLI/tui/v2/components/password"
 )
 
 const mnemonicColumns = 3
@@ -60,7 +61,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.bindings.toggle):
 			m.show = !m.show
 		case key.Matches(msg, m.bindings.accept):
-			return m, tui.Quit()
+			return password.New(m.ctx, m.state)
 		case key.Matches(msg, m.bindings.language):
 			return NewLanguage(m.ctx, m.state)
 		case key.Matches(msg, m.bindings.bitlen):
