@@ -61,6 +61,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.show = !m.show
 		case key.Matches(msg, m.bindings.accept):
 			return m, tui.Quit()
+		case key.Matches(msg, m.bindings.language):
+			return NewLanguage(m.ctx, m.state)
 		case key.Matches(msg, m.bindings.quit):
 			return m, tui.QuitWithError(errors.New("mnemonic wasn't accepted"))
 		}
