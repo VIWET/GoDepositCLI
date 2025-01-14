@@ -12,11 +12,12 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui/v2"
+	"github.com/viwet/GoDepositCLI/tui/v2/components/deposits"
 )
 
-type Model[Config app.ConfigConstraint] struct {
+type Model struct {
 	ctx   *cli.Context
-	state *app.State[Config]
+	state *app.State[app.DepositConfig]
 
 	password textinput.Model
 	confirm  textinput.Model
@@ -26,8 +27,8 @@ type Model[Config app.ConfigConstraint] struct {
 	help     help.Model
 }
 
-func New[Config app.ConfigConstraint](ctx *cli.Context, state *app.State[Config]) (tea.Model, tea.Cmd) {
-	model := &Model[Config]{
+func New(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+	model := &Model{
 		ctx:   ctx,
 		state: state,
 
@@ -49,11 +50,11 @@ func newInput() textinput.Model {
 	return input
 }
 
-func (m *Model[Config]) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m *Model[Config]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case confirm:
 		return m.onConfirm(msg)
@@ -77,7 +78,7 @@ func (m *Model[Config]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(m.updatePassword(msg), m.updateConfirm(msg))
 }
 
-func (m *Model[Config]) View() string {
+func (m *Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
 		m.style.title.Foreground(m.style.colors.White).Render("Password"),
@@ -92,7 +93,7 @@ func (m *Model[Config]) View() string {
 	)
 }
 
-func (m *Model[Config]) onConfirm(msg confirm) (tea.Model, tea.Cmd) {
+func (m *Model) onConfirm(msg confirm) (tea.Model, tea.Cmd) {
 	m.resetInputErrors()
 	switch {
 	case m.password.Focused():
@@ -105,14 +106,14 @@ func (m *Model[Config]) onConfirm(msg confirm) (tea.Model, tea.Cmd) {
 		m.confirm.Err = msg.confirmation
 		if msg.validation == nil && msg.confirmation == nil {
 			m.state.WithPassword(m.password.Value())
-			return m, tui.Quit()
+			return deposits.New(m.ctx, m.state)
 		}
 	}
 
 	return m, nil
 }
 
-func (m *Model[Config]) onReset() (tea.Model, tea.Cmd) {
+func (m *Model) onReset() (tea.Model, tea.Cmd) {
 	m.resetInputErrors()
 	switch {
 	case m.password.Focused():
@@ -125,30 +126,30 @@ func (m *Model[Config]) onReset() (tea.Model, tea.Cmd) {
 	return m, m.password.Focus()
 }
 
-func (m *Model[Config]) onToggle() (tea.Model, tea.Cmd) {
+func (m *Model) onToggle() (tea.Model, tea.Cmd) {
 	m.password.EchoMode ^= 1
 	m.confirm.EchoMode ^= 1
 	return m, nil
 }
 
-func (m *Model[Config]) resetInputErrors() {
+func (m *Model) resetInputErrors() {
 	m.password.Err = nil
 	m.confirm.Err = nil
 }
 
-func (m *Model[Config]) updatePassword(msg tea.Msg) tea.Cmd {
+func (m *Model) updatePassword(msg tea.Msg) tea.Cmd {
 	password, cmd := m.password.Update(msg)
 	m.password = password
 	return cmd
 }
 
-func (m *Model[Config]) updateConfirm(msg tea.Msg) tea.Cmd {
+func (m *Model) updateConfirm(msg tea.Msg) tea.Cmd {
 	confirm, cmd := m.confirm.Update(msg)
 	m.confirm = confirm
 	return cmd
 }
 
-func (m *Model[Config]) inputView(input textinput.Model, name string) string {
+func (m *Model) inputView(input textinput.Model, name string) string {
 	render := m.style.input.Foreground(m.style.colors.Black).Render
 	if input.Focused() {
 		render = m.style.input.Foreground(m.style.colors.Magenta).Render
@@ -169,10 +170,10 @@ func (m *Model[Config]) inputView(input textinput.Model, name string) string {
 	)
 }
 
-func (m *Model[Config]) passwordView() string {
+func (m *Model) passwordView() string {
 	return m.inputView(m.password, "Password:")
 }
 
-func (m *Model[Config]) confirmView() string {
+func (m *Model) confirmView() string {
 	return m.inputView(m.confirm, "Confirmation:")
 }
