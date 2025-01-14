@@ -7,11 +7,7 @@ import (
 	"github.com/viwet/GoDepositCLI/app"
 )
 
-type configConstraint interface {
-	app.DepositConfig | app.BLSToExecutionConfig
-}
-
-type NewModel[Config configConstraint] func(ctx *cli.Context, state *app.State[Config]) (tea.Model, tea.Cmd)
+type NewModel[Config app.ConfigConstraint] func(ctx *cli.Context, state *app.State[Config]) (tea.Model, tea.Cmd)
 
 type MainModel struct {
 	model       tea.Model
@@ -23,14 +19,14 @@ func (m MainModel) Err() error {
 	return m.err
 }
 
-func newMainModel[Config configConstraint](model tea.Model, initCommand tea.Cmd) *MainModel {
+func newMainModel[Config app.ConfigConstraint](model tea.Model, initCommand tea.Cmd) *MainModel {
 	return &MainModel{
 		model:       model,
 		initCommand: initCommand,
 	}
 }
 
-func Run[Config configConstraint](ctx *cli.Context, state *app.State[Config], newModel NewModel[Config]) error {
+func Run[Config app.ConfigConstraint](ctx *cli.Context, state *app.State[Config], newModel NewModel[Config]) error {
 	var (
 		model = newMainModel[Config](newModel(ctx, state))
 		err   error

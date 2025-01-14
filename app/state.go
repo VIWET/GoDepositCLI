@@ -2,11 +2,11 @@ package app
 
 import "github.com/viwet/GoBIP39/words"
 
-type configConstraint interface {
+type ConfigConstraint interface {
 	DepositConfig | BLSToExecutionConfig
 }
 
-type State[Config configConstraint] struct {
+type State[Config ConfigConstraint] struct {
 	cfg *Config
 
 	mnemonic []string
@@ -14,7 +14,7 @@ type State[Config configConstraint] struct {
 	password string
 }
 
-func NewState[Config configConstraint](cfg *Config) *State[Config] {
+func NewState[Config ConfigConstraint](cfg *Config) *State[Config] {
 	return &State[Config]{cfg: cfg}
 }
 
