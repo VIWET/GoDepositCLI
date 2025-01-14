@@ -7,8 +7,6 @@ import (
 	"github.com/viwet/GoDepositCLI/tui/v2/components/menu"
 )
 
-type LanguageMenu menu.Model
-
 var languages = [...]string{
 	"English",
 	"Chinese Simplified",
@@ -23,10 +21,10 @@ var languages = [...]string{
 }
 
 func NewLanguage(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
-	return menu.New("Language", generateOptions(ctx, state)...), nil
+	return menu.New("Language", generateLanguageOptions(ctx, state)...), nil
 }
 
-func generateOptions(ctx *cli.Context, state *app.State[app.DepositConfig]) []menu.Option {
+func generateLanguageOptions(ctx *cli.Context, state *app.State[app.DepositConfig]) []menu.Option {
 	options := make([]menu.Option, len(languages))
 	for i, lang := range languages {
 		options[i] = menu.NewOption(lang, func() (tea.Model, tea.Cmd) {
