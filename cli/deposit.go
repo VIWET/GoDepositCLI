@@ -32,12 +32,13 @@ func generateDepositsFromNewMnemonicNonInteractive(ctx *cli.Context, state *app.
 	}
 
 	state.WithMnemonic(mnemonic, list)
-	ShowMnemonic(state)
 
 	password, err := ReadPassword(ctx)
 	if err != nil {
 		return err
 	}
+
+	ShowMnemonic(state)
 
 	return generateDeposits(ctx.Context, state.WithPassword(password))
 }
