@@ -172,14 +172,14 @@ func (m *Model[Config]) updateConfirm(msg tea.Msg) tea.Cmd {
 }
 
 func (m *Model[Config]) inputView(input textinput.Model, name string) string {
-	render := m.style.input.Foreground(m.style.colors.Text).Render
+	input.TextStyle = m.style.input.Foreground(m.style.colors.Text)
 	if input.Focused() {
-		render = m.style.input.Foreground(m.style.colors.Accent).Render
+		input.TextStyle = m.style.input.Foreground(m.style.colors.Accent)
 	}
 
 	var errView string
 	if err := input.Err; err != nil {
-		errView = m.style.error.Foreground(m.style.colors.Accent).Render(
+		errView = m.style.error.Foreground(m.style.colors.Error).Render(
 			fmt.Sprintf("[Error]: %s", err.Error()),
 		)
 	}
@@ -187,7 +187,7 @@ func (m *Model[Config]) inputView(input textinput.Model, name string) string {
 	return lipgloss.JoinHorizontal(
 		lipgloss.Bottom,
 		m.style.form.Foreground(m.style.colors.Text).Render(name),
-		render(input.View()),
+		input.View(),
 		errView,
 	)
 }
