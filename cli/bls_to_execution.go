@@ -5,6 +5,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
+	"github.com/viwet/GoDepositCLI/io"
 )
 
 func GenerateBLSToExecution(ctx *cli.Context) error {
@@ -31,11 +32,11 @@ func generateBLSToExecution(ctx context.Context, state *app.State[app.BLSToExecu
 	}
 
 	cfg := state.Config()
-	if err := ensureDirectoryExist(cfg.Directory); err != nil {
+	if err := io.EnsureDirectoryExist(cfg.Directory); err != nil {
 		return err
 	}
 
-	if err := saveBLSToExecution(messages, cfg.Directory); err != nil {
+	if err := io.SaveBLSToExecution(messages, cfg.Directory); err != nil {
 		return err
 	}
 

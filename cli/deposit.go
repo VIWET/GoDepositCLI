@@ -5,6 +5,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
+	"github.com/viwet/GoDepositCLI/io"
 )
 
 func GenerateDepositsFromNewMnemonic(ctx *cli.Context) error {
@@ -63,15 +64,15 @@ func generateDeposits(ctx context.Context, state *app.State[app.DepositConfig]) 
 	}
 
 	cfg := state.Config()
-	if err := ensureDirectoryExist(cfg.Directory); err != nil {
+	if err := io.EnsureDirectoryExist(cfg.Directory); err != nil {
 		return err
 	}
 
-	if err := saveDeposits(deposits, cfg.Directory); err != nil {
+	if err := io.SaveDeposits(deposits, cfg.Directory); err != nil {
 		return err
 	}
 
-	if err := saveKeystores(keystores, cfg.Directory); err != nil {
+	if err := io.SaveKeystores(keystores, cfg.Directory); err != nil {
 		return err
 	}
 
