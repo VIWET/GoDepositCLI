@@ -59,7 +59,7 @@ make NETWORK=ethereum
 	--amount="<key_index_2>:<amount_2>"
 	```
 
-	Amount value can be set with `GWEI` or `FTN`/ `ETH` prefix (eg, `1FTN`, `1ETH`, `100GWEI`), if there is no prefix the value will be accounted as `FTN`/`ETH`.
+	Amount value can be set with `GWEI` or `FTN`/`ETH` prefix (e.g., `1FTN`, `1ETH`, `100GWEI`), if there is no prefix the value will be accounted as `FTN`/`ETH`.
 
 - `--withdrawal-addresses`
 
