@@ -61,7 +61,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.bindings.toggle):
 			m.show = !m.show
 		case key.Matches(msg, m.bindings.accept):
-			return password.New(m.ctx, m.state)
+			next := password.NewDepositPassword()
+			return next(m.ctx, m.state)
 		case key.Matches(msg, m.bindings.language):
 			return NewLanguage(m.ctx, m.state)
 		case key.Matches(msg, m.bindings.bitlen):
