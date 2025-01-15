@@ -1,6 +1,7 @@
 package mnemonic_input
 
 import (
+	"errors"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -52,7 +53,7 @@ func newModel[Config app.ConfigConstraint](
 		next: next,
 	}
 
-	return model, nil
+	return model, tui.QuitWithError(errors.New("mnemonic input model is unimplemented - coming soon"))
 }
 
 func (m *Model[Config]) Init() tea.Cmd {

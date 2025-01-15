@@ -62,5 +62,8 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 var container = lipgloss.NewStyle().Padding(1, 2)
 
 func (m *MainModel) View() string {
-	return container.Render(m.model.View())
+	if m.model != nil {
+		return container.Render(m.model.View())
+	}
+	return ""
 }
