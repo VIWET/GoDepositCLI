@@ -78,7 +78,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		m.style.title.Foreground(m.style.colors.White).Render("Mnemonic"),
+		m.style.title.Foreground(m.style.colors.Title).Render("Mnemonic"),
 		m.style.container.Render(
 			lipgloss.JoinHorizontal(lipgloss.Bottom, m.mnemonicColumnsView()...),
 		),
@@ -123,8 +123,8 @@ func (m Model) wordView(word string, index int) string {
 	return m.style.wordContainer.Render(
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			m.style.index.Foreground(m.style.colors.Black).Render(strconv.Itoa(index)),
-			m.style.word.Foreground(m.style.colors.White).Render(word),
+			m.style.index.Foreground(m.style.colors.Text).Render(strconv.Itoa(index)),
+			m.style.word.Foreground(m.style.colors.Title).Render(word),
 		),
 	)
 }

@@ -57,7 +57,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		m.style.title.Foreground(m.style.colors.White).Render(m.title),
+		m.style.title.Foreground(m.style.colors.Title).Render(m.title),
 		m.style.container.Render(
 			lipgloss.JoinVertical(lipgloss.Left, m.optionsView()...),
 		),
@@ -68,8 +68,8 @@ func (m Model) View() string {
 func (m Model) optionsView() []string {
 	var (
 		views    = make([]string, len(m.options))
-		selected = m.style.selected.Foreground(m.style.colors.Magenta).Render
-		option   = m.style.option.Foreground(m.style.colors.Black).Render
+		selected = m.style.selected.Foreground(m.style.colors.Accent).Render
+		option   = m.style.option.Foreground(m.style.colors.Text).Render
 	)
 
 	for i, opt := range m.options {

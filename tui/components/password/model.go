@@ -103,7 +103,7 @@ func (m *Model[Config]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model[Config]) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		m.style.title.Foreground(m.style.colors.White).Render("Password"),
+		m.style.title.Foreground(m.style.colors.Title).Render("Password"),
 		m.style.container.Render(
 			lipgloss.JoinVertical(
 				lipgloss.Left,
@@ -172,21 +172,21 @@ func (m *Model[Config]) updateConfirm(msg tea.Msg) tea.Cmd {
 }
 
 func (m *Model[Config]) inputView(input textinput.Model, name string) string {
-	render := m.style.input.Foreground(m.style.colors.Black).Render
+	render := m.style.input.Foreground(m.style.colors.Text).Render
 	if input.Focused() {
-		render = m.style.input.Foreground(m.style.colors.Magenta).Render
+		render = m.style.input.Foreground(m.style.colors.Accent).Render
 	}
 
 	var errView string
 	if err := input.Err; err != nil {
-		errView = m.style.error.Foreground(m.style.colors.Red).Render(
+		errView = m.style.error.Foreground(m.style.colors.Accent).Render(
 			fmt.Sprintf("[Error]: %s", err.Error()),
 		)
 	}
 
 	return lipgloss.JoinHorizontal(
 		lipgloss.Bottom,
-		m.style.form.Foreground(m.style.colors.Black).Render(name),
+		m.style.form.Foreground(m.style.colors.Text).Render(name),
 		render(input.View()),
 		errView,
 	)

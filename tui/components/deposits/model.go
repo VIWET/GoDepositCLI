@@ -38,7 +38,7 @@ func New(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.
 
 		bindings: newBindings(),
 		style:    newStyle(tui.DefaultColorscheme()),
-		progress: progress.New(progress.WithSolidFill(tui.DefaultColorscheme().Magenta.Light)),
+		progress: progress.New(progress.WithSolidFill(tui.DefaultColorscheme().Accent.Light)),
 	}, tea.Batch(result, WaitDeposit(ticks))
 }
 
@@ -70,10 +70,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	m.progress.PercentageStyle.Foreground(m.style.colors.Black).Bold(true)
+	m.progress.PercentageStyle.Foreground(m.style.colors.Text).Bold(true)
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		m.style.title.Foreground(m.style.colors.White).Render("Deposits and Keystores"),
+		m.style.title.Foreground(m.style.colors.Title).Render("Deposits and Keystores"),
 		m.style.container.Render(m.progressView()),
 	)
 }
