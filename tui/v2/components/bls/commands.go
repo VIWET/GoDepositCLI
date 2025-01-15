@@ -6,6 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/viwet/GoDepositCLI/app"
+	"github.com/viwet/GoDepositCLI/io"
+	"github.com/viwet/GoDepositCLI/tui/v2"
 	"github.com/viwet/GoDepositCLI/types"
 )
 
@@ -51,4 +53,22 @@ func WaitBLSToExecution(ticks <-chan blsToExecution) tea.Cmd {
 	return func() tea.Msg {
 		return <-ticks
 	}
+}
+
+func SaveResult(result result, dir string) tea.Cmd {
+	return func() tea.Msg {
+		if err := io.EnsureDirectoryExist(dir); err != nil {
+			return unwrap(tui.QuitWithError(err))
+		}
+
+		if err := io.SaveBLSToExecution(result.messages, dir); err != nil {
+			return unwrap(tui.QuitWithError(err))
+		}
+
+		return unwrap(tui.Quit())
+	}
+}
+
+func unwrap(cmd tea.Cmd) tea.Msg {
+	return cmd()
 }

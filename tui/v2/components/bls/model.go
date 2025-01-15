@@ -19,6 +19,7 @@ type Model struct {
 	ticks     <-chan blsToExecution
 	increment float64
 	quitting  bool
+	dir       string
 
 	bindings bindings
 	style    style
@@ -33,6 +34,7 @@ func New(ctx *cli.Context, state *app.State[app.BLSToExecutionConfig]) (tea.Mode
 		cancel:    engineCancel,
 		ticks:     ticks,
 		increment: 1.0 / float64(state.Config().Number),
+		dir:       state.Config().Directory,
 
 		bindings: newBindings(),
 		style:    newStyle(tui.DefaultColorscheme()),
@@ -51,7 +53,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tui.QuitWithError(msg.err)
 		}
 		m.quitting = true
-		return m, tui.Quit()
+		return m, SaveResult(msg, m.dir)
 	case blsToExecution:
 		return m, tea.Batch(m.progress.IncrPercent(m.increment), WaitBLSToExecution(m.ticks))
 	case tea.KeyMsg:
