@@ -3,37 +3,65 @@ package password
 import (
 	"errors"
 	"fmt"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/urfave/cli/v2"
+	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
+	"github.com/viwet/GoDepositCLI/tui/components/bls"
+	"github.com/viwet/GoDepositCLI/tui/components/deposits"
 )
 
-const MinPasswordLength = 8
+type Model[Config app.ConfigConstraint] struct {
+	ctx   *cli.Context
+	state *app.State[Config]
 
-type Model struct {
-	password    textinput.Model
-	passwordErr error
+	password textinput.Model
+	confirm  textinput.Model
 
-	confirm    textinput.Model
-	confirmErr error
+	bindings bindings
+	style    style
+	help     help.Model
 
-	binding bindings
-	help    help.Model
+	next tui.NewModel[Config]
 }
 
-func New() *Model {
-	return &Model{
+func NewDepositPassword() tui.NewModel[app.DepositConfig] {
+	return func(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+		return newModel(ctx, state, deposits.New)
+	}
+}
+
+func NewBLSToExecutionPassword() tui.NewModel[app.BLSToExecutionConfig] {
+	return func(ctx *cli.Context, state *app.State[app.BLSToExecutionConfig]) (tea.Model, tea.Cmd) {
+		return newModel(ctx, state, bls.New)
+	}
+}
+
+func newModel[Config app.ConfigConstraint](ctx *cli.Context, state *app.State[Config], next tui.NewModel[Config]) (tea.Model, tea.Cmd) {
+	if ctx.IsSet(tui.PasswordFlagName) {
+		password := ctx.String(tui.PasswordFlagName)
+		state.WithPassword(password)
+		return next(ctx, state)
+	}
+
+	model := &Model[Config]{
+		ctx:   ctx,
+		state: state,
+
 		password: newInput(),
 		confirm:  newInput(),
-		binding:  newBindings(),
+		bindings: newBindings(),
+		style:    newStyle(tui.DefaultColorscheme()),
 		help:     help.New(),
+		next:     next,
 	}
+
+	return model, model.password.Focus()
 }
 
 func newInput() textinput.Model {
@@ -44,57 +72,27 @@ func newInput() textinput.Model {
 	return input
 }
 
-func (m *Model) Value() string {
-	return m.password.Value()
-}
-
-func (m *Model) Init() tea.Cmd {
+func (m *Model[Config]) Init() tea.Cmd {
 	return nil
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if !m.password.Focused() && !m.confirm.Focused() {
-		return m, m.password.Focus()
-	}
-
+func (m *Model[Config]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case confirm:
+		return m.onConfirm(msg)
+
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.binding.accept):
-			switch {
-			case m.password.Focused():
-				if m.isValidPassword() {
-					m.password.Blur()
-					return m, m.confirm.Focus()
-				}
+		case key.Matches(msg, m.bindings.accept):
+			return m, Confirm(m.password.Value(), m.confirm.Value())
 
-			case m.confirm.Focused():
-				if m.isConfirmedPassword() {
-					return m, tui.Quit()
-				}
-			}
+		case key.Matches(msg, m.bindings.reset):
+			return m.onReset()
 
-		case key.Matches(msg, m.binding.cancel):
-			switch {
-			case m.password.Focused():
-				m.confirm.Reset()
-				m.confirmErr = nil
-				m.password.Reset()
-				m.passwordErr = nil
-				return m, nil
-			case m.confirm.Focused():
-				m.confirm.Reset()
-				m.confirm.Blur()
-				m.confirmErr = nil
-				return m, m.password.Focus()
-			}
+		case key.Matches(msg, m.bindings.toggle):
+			return m.onToggle()
 
-		case key.Matches(msg, m.binding.toggle):
-			m.password.EchoMode ^= 1
-			m.confirm.EchoMode ^= 1
-			return m, nil
-
-		case key.Matches(msg, m.binding.quit):
+		case key.Matches(msg, m.bindings.quit):
 			return m, tui.QuitWithError(errors.New("password input canceled"))
 		}
 	}
@@ -102,89 +100,102 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(m.updatePassword(msg), m.updateConfirm(msg))
 }
 
-func (m *Model) View() string {
+func (m *Model[Config]) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		renderTitle("Password"),
-		m.renderForm(),
-		renderHelp(m.help, m.binding),
+		m.style.title.Foreground(m.style.colors.White).Render("Password"),
+		m.style.container.Render(
+			lipgloss.JoinVertical(
+				lipgloss.Left,
+				m.passwordView(),
+				m.confirmView(),
+			),
+		),
+		m.help.View(m.bindings),
 	)
 }
 
-func (m *Model) updatePassword(msg tea.Msg) tea.Cmd {
+func (m *Model[Config]) onConfirm(msg confirm) (tea.Model, tea.Cmd) {
+	m.resetInputErrors()
+	switch {
+	case m.password.Focused():
+		m.password.Err = msg.validation
+		if msg.validation == nil {
+			m.password.Blur()
+			return m, m.confirm.Focus()
+		}
+	case m.confirm.Focused():
+		m.confirm.Err = msg.confirmation
+		if msg.validation == nil && msg.confirmation == nil {
+			m.state.WithPassword(m.password.Value())
+			return m.next(m.ctx, m.state)
+		}
+	}
+
+	return m, nil
+}
+
+func (m *Model[Config]) onReset() (tea.Model, tea.Cmd) {
+	m.resetInputErrors()
+	switch {
+	case m.password.Focused():
+		m.confirm.Reset()
+		m.password.Reset()
+	case m.confirm.Focused():
+		m.confirm.Reset()
+		m.confirm.Blur()
+	}
+	return m, m.password.Focus()
+}
+
+func (m *Model[Config]) onToggle() (tea.Model, tea.Cmd) {
+	m.password.EchoMode ^= 1
+	m.confirm.EchoMode ^= 1
+	return m, nil
+}
+
+func (m *Model[Config]) resetInputErrors() {
+	m.password.Err = nil
+	m.confirm.Err = nil
+}
+
+func (m *Model[Config]) updatePassword(msg tea.Msg) tea.Cmd {
 	password, cmd := m.password.Update(msg)
 	m.password = password
 	return cmd
 }
 
-func (m *Model) updateConfirm(msg tea.Msg) tea.Cmd {
+func (m *Model[Config]) updateConfirm(msg tea.Msg) tea.Cmd {
 	confirm, cmd := m.confirm.Update(msg)
 	m.confirm = confirm
 	return cmd
 }
 
-func (m *Model) isValidPassword() bool {
-	if strings.TrimSpace(m.password.Value()) == "" {
-		m.passwordErr = errors.New("Password cannot contain only blank spaces")
-		return false
-	}
-	if utf8.RuneCountInString(m.password.Value()) < MinPasswordLength {
-		m.passwordErr = errors.New("Password must be at least 8 characters")
-		return false
-	}
-	m.passwordErr = nil
-	return true
-}
-
-func (m *Model) isConfirmedPassword() bool {
-	if !m.isValidPassword() {
-		return false
-	}
-
-	if m.password.Value() != m.confirm.Value() {
-		m.confirmErr = errors.New("Passwords are not equal")
-		return false
-	}
-
-	m.confirmErr = nil
-	return true
-}
-
-func renderTitle(title string) string {
-	return titleStyle.Render(title)
-}
-
-func (m *Model) renderForm() string {
-	return passwordSectionContainerStyle.Render(
-		lipgloss.JoinVertical(
-			lipgloss.Left,
-			renderInput(m.password, "Password:", m.passwordErr),
-			renderInput(m.confirm, "Confirmation:", m.confirmErr),
-		),
-	)
-}
-
-func renderInput(input textinput.Model, name string, err error) string {
-	inputStyle = inputStyle.Foreground(defaultInputColor)
+func (m *Model[Config]) inputView(input textinput.Model, name string) string {
+	render := m.style.input.Foreground(m.style.colors.Black).Render
 	if input.Focused() {
-		inputStyle = inputStyle.Foreground(focusedInputColor)
+		render = m.style.input.Foreground(m.style.colors.Magenta).Render
 	}
+
+	var errView string
+	if err := input.Err; err != nil {
+		errView = m.style.error.Foreground(m.style.colors.Red).Render(
+			fmt.Sprintf("[Error]: %s", err.Error()),
+		)
+	}
+
 	return lipgloss.JoinHorizontal(
 		lipgloss.Bottom,
-		inputFormStyle.Render(name),
-		inputStyle.Render(input.View()),
-		renderInputError(err),
+		m.style.form.Foreground(m.style.colors.Black).Render(name),
+		render(input.View()),
+		errView,
 	)
 }
 
-func renderInputError(err error) string {
-	if err == nil {
-		return ""
-	}
-
-	return errorStyle.Render(fmt.Sprintf("[Error]: %s", err.Error()))
+func (m *Model[Config]) passwordView() string {
+	return m.inputView(m.password, "Password:")
 }
 
-func renderHelp(help help.Model, binding help.KeyMap) string {
-	return help.View(binding)
+func (m *Model[Config]) confirmView() string {
+	return m.inputView(m.confirm, "Confirmation:")
 }

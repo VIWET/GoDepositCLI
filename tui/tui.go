@@ -1,22 +1,57 @@
 package tui
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/urfave/cli/v2"
+	"github.com/viwet/GoDepositCLI/app"
+)
 
-type Model struct {
-	model tea.Model
-	err   error
+type NewModel[Config app.ConfigConstraint] func(ctx *cli.Context, state *app.State[Config]) (tea.Model, tea.Cmd)
+
+type MainModel struct {
+	model       tea.Model
+	initCommand tea.Cmd
+	err         error
 }
 
-func (m *Model) Init() tea.Cmd {
-	return m.model.Init()
+func (m MainModel) Err() error {
+	return m.err
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func newMainModel[Config app.ConfigConstraint](model tea.Model, initCommand tea.Cmd) *MainModel {
+	return &MainModel{
+		model:       model,
+		initCommand: initCommand,
+	}
+}
+
+func Run[Config app.ConfigConstraint](ctx *cli.Context, state *app.State[Config], newModel NewModel[Config]) error {
+	var (
+		model = newMainModel[Config](newModel(ctx, state))
+		err   error
+	)
+
+	if _, err = tea.NewProgram(model).Run(); err != nil {
+		return err
+	}
+
+	if err := model.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *MainModel) Init() tea.Cmd {
+	return m.initCommand
+}
+
+func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case quit:
-		m.err = msg.err
-		// TODO: make more elegant solution
-		return empty{}, tea.Quit
+		m.err = msg.Err()
+		return m, tea.Quit
 	default:
 		model, cmd := m.model.Update(msg)
 		m.model = model
@@ -24,37 +59,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m *Model) View() string {
-	return appContainerStyle.Render(m.model.View())
-}
+var container = lipgloss.NewStyle().Padding(1, 2)
 
-func newModel(model tea.Model) *Model {
-	return &Model{model: model}
-}
-
-func Run(model tea.Model) error {
-	appModel := newModel(model)
-	if _, err := tea.NewProgram(appModel).Run(); err != nil {
-		return err
-	}
-
-	if err := appModel.err; err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type empty struct{}
-
-func (e empty) Init() tea.Cmd {
-	return nil
-}
-
-func (e empty) Update(tea.Msg) (tea.Model, tea.Cmd) {
-	return e, nil
-}
-
-func (e empty) View() string {
-	return ""
+func (m *MainModel) View() string {
+	return container.Render(m.model.View())
 }

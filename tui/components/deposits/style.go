@@ -2,7 +2,7 @@ package deposits
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/viwet/GoDepositCLI/tui/v2"
+	"github.com/viwet/GoDepositCLI/tui"
 )
 
 type style struct {

@@ -4,7 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
-	"github.com/viwet/GoDepositCLI/tui/v2/components/menu"
+	"github.com/viwet/GoDepositCLI/tui/components/menu"
 )
 
 var languages = [...]string{

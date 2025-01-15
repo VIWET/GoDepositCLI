@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
-	"github.com/viwet/GoDepositCLI/tui/v2"
+	"github.com/viwet/GoDepositCLI/tui"
 )
 
 type Model struct {

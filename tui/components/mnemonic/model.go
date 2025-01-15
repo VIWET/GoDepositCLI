@@ -10,40 +10,64 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/urfave/cli/v2"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
+	"github.com/viwet/GoDepositCLI/tui/components/password"
 )
 
-const columns = 3
+const mnemonicColumns = 3
 
 type Model struct {
-	state   *app.State[app.DepositConfig]
-	show    bool
-	binding bindings
-	help    help.Model
+	ctx   *cli.Context
+	state *app.State[app.DepositConfig]
+
+	bindings bindings
+	style    style
+
+	show bool
+	help help.Model
 }
 
-func New(state *app.State[app.DepositConfig]) *Model {
-	return &Model{
-		state:   state,
-		binding: newBindings(),
-		help:    help.New(),
+func New(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	if mnemonic := state.Mnemonic(); len(mnemonic) == 0 {
+		cmd = generateMnemonic(state)
 	}
+
+	return Model{
+		ctx:      ctx,
+		state:    state,
+		bindings: newBindings(),
+		style:    newStyle(tui.DefaultColorscheme()),
+		help:     help.New(),
+	}, cmd
 }
 
-func (m *Model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case *Mnemonic:
+		if msg.err != nil {
+			return m, tui.QuitWithError(msg.err)
+		}
+		m.state.WithMnemonic(msg.mnemonic, msg.list)
+		return m, nil
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.binding.toggle):
+		case key.Matches(msg, m.bindings.toggle):
 			m.show = !m.show
-		case key.Matches(msg, m.binding.accept):
-			return m, tui.Quit()
-		case key.Matches(msg, m.binding.quit):
+		case key.Matches(msg, m.bindings.accept):
+			next := password.NewDepositPassword()
+			return next(m.ctx, m.state)
+		case key.Matches(msg, m.bindings.language):
+			return NewLanguage(m.ctx, m.state)
+		case key.Matches(msg, m.bindings.bitlen):
+			return NewBitlen(m.ctx, m.state)
+		case key.Matches(msg, m.bindings.quit):
 			return m, tui.QuitWithError(errors.New("mnemonic wasn't accepted"))
 		}
 	}
@@ -51,80 +75,56 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m *Model) View() string {
+func (m Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		renderTitle("Mnemonic"),
-		m.renderMnemonic(),
-		renderHelp(m.help, m.binding),
-	)
-}
-
-func renderTitle(title string) string {
-	return titleStyle.Render(title)
-}
-
-func (m *Model) renderMnemonic() string {
-	mnemonic, words := m.state.Mnemonic(), m.state.Words()
-	return mnemonicSectionContainerStyle.Render(
-		lipgloss.JoinVertical(
-			lipgloss.Left,
-			renderLanguage(words().Language()),
-			lipgloss.JoinHorizontal(
-				lipgloss.Bottom,
-				renderMnemonicColumn(mnemonic, 0, m.show),
-				renderMnemonicColumn(mnemonic, 1, m.show),
-				renderMnemonicColumn(mnemonic, 2, m.show),
-			),
+		m.style.title.Foreground(m.style.colors.White).Render("Mnemonic"),
+		m.style.container.Render(
+			lipgloss.JoinHorizontal(lipgloss.Bottom, m.mnemonicColumnsView()...),
 		),
+		m.help.View(m.bindings),
 	)
 }
 
-func renderLanguage(language string) string {
-	return mnemonicLanguageSectionContainerStyle.Render(
-		lipgloss.JoinHorizontal(
-			lipgloss.Bottom,
-			mnemonicLanguageStyle.Render("Language: "),
-			mnemonicLanguageStyle.Italic(true).Render(language),
-		),
-	)
+func (m Model) mnemonicColumnsView() []string {
+	views := make([]string, mnemonicColumns)
+	for column := range mnemonicColumns {
+		views[column] = m.mnemonicColumnView(column)
+	}
+
+	return views
 }
 
-func renderMnemonicColumn(mnemonic []string, column int, show bool) string {
+func (m Model) mnemonicColumnView(column int) string {
 	var (
-		rows  = len(mnemonic) / columns
+		mnemonic = m.state.Mnemonic()
+
+		rows  = len(mnemonic) / mnemonicColumns
 		views = make([]string, rows)
 	)
 
 	for row := range rows {
 		var (
-			index = row*columns + column
+			index = row*mnemonicColumns + column
 			word  = mnemonic[index]
 		)
 
-		if !show {
+		if !m.show {
 			word = strings.Repeat("*", utf8.RuneCountInString(word))
 		}
 
-		views[row] = renderWordWithIndex(word, index+1)
+		views[row] = m.wordView(word, index+1)
 	}
 
-	return lipgloss.JoinVertical(
-		lipgloss.Left,
-		views...,
-	)
+	return lipgloss.JoinVertical(lipgloss.Left, views...)
 }
 
-func renderWordWithIndex(word string, index int) string {
-	return mnemonicWordIndexStyle.Render(
+func (m Model) wordView(word string, index int) string {
+	return m.style.wordContainer.Render(
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			mnemonicIndexStyle.Render(strconv.Itoa(index)),
-			mnemonicWordStyle.Render(word),
+			m.style.index.Foreground(m.style.colors.Black).Render(strconv.Itoa(index)),
+			m.style.word.Foreground(m.style.colors.White).Render(word),
 		),
 	)
-}
-
-func renderHelp(help help.Model, binding help.KeyMap) string {
-	return help.View(binding)
 }

@@ -7,7 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/io"
-	"github.com/viwet/GoDepositCLI/tui/v2"
+	"github.com/viwet/GoDepositCLI/tui"
 	"github.com/viwet/GoDepositCLI/types"
 	keystore "github.com/viwet/GoKeystoreV4"
 )
