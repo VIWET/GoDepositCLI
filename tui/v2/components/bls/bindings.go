@@ -1,4 +1,4 @@
-package deposits
+package bls
 
 import "github.com/charmbracelet/bubbles/key"
 
