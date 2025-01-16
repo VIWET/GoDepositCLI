@@ -1,6 +1,6 @@
 # Go Deposit CLI
 
-CLI for generation of Bahamut chain and Ethereum 2.0 keys written in Golang
+CLI for generating of Bahamut chain and Ethereum 2.0 keys written in Golang
 
 ## Build
 
@@ -28,13 +28,13 @@ make NETWORK=ethereum
 
 - [ ] Mnemonic input refactoring
 
-- [ ] Password generation
+- [ ] Password generating
 
 - [ ] Execution and Consensus layer clients
 
-## Deposit generation
+## Deposit generating
 
-![Deposits generation](images/demo.gif)
+![Deposits generating](images/demo.gif)
 
 #### Flags
 
@@ -44,7 +44,7 @@ make NETWORK=ethereum
 
 	Default: `0`
 
-	The index of the key from which `staking-cli` will start deposits and keystores or BLS to Execution messages generation. For example, if you generated `N` keys using specific mnemonic, than for the next batch of keys you must use `--start-index=N` flag.
+	The index of the key from which `staking-cli` will start deposits and keystores or BLS to Execution messages generating. For example, if you generated `N` keys using specific mnemonic, than for the next batch of keys you must use `--start-index=N` flag.
 
 - `--number`
 
@@ -97,7 +97,7 @@ make NETWORK=ethereum
 
 - `--keystore-kdf`
 
-	The key derivation function, that will be used for keystore generation. There are only two possible values: `scrypt` and `pbkdf2`.
+	The key derivation function, that will be used for keystore generating. There are only two possible values: `scrypt` and `pbkdf2`.
 
 - `--chain`
 
@@ -125,7 +125,7 @@ make NETWORK=ethereum
 
 	Aliases: `--cfg`
 
-	The config file, that will be used for deposits and keystores generation.
+	The config file, that will be used for deposits and keystores generating.
 
 	Example:
 
@@ -185,7 +185,7 @@ make NETWORK=ethereum
 
 - `--mnemonic`
 
-    The seed phrase that will be used for keys generation. If `--mnemonic` is not set, `staking-cli` will ask you to enter it.
+    The seed phrase that will be used for keys generating. If `--mnemonic` is not set, `staking-cli` will ask you to enter it.
 
     NOTE: If you are using `--non-interactive` flag - this is a mandatory option
 
@@ -243,7 +243,7 @@ make NETWORK=ethereum
 
 #### Flags
 
-Generally `bls-to-execution` command use the same collection of flags as deposit generation command:
+Generally `bls-to-execution` command use the same collection of flags as deposit generating command:
 
 - `--mnemonic-language`
 
@@ -275,7 +275,7 @@ and two new flags:
 
 	 Aliases: `--cfg`
 
-	The config file, that will be used for BLS to Execution messages generation.
+	The config file, that will be used for BLS to Execution messages generating.
 
 	Example:
 
