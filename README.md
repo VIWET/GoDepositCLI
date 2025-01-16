@@ -22,6 +22,8 @@ make NETWORK=ethereum
 
 ## Deposit generation
 
+![Deposits generation](images/demo.gif)
+
 #### Flags
 
 - `--start-index`
