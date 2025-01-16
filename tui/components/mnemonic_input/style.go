@@ -1,25 +1,32 @@
-package mnemonicInput
+package mnemonic_input
 
-import "github.com/charmbracelet/lipgloss"
-
-var (
-	titleStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("#7f7f7f"))
-
-	mnemonicSectionContainerStyle = lipgloss.NewStyle().Padding(1, 0)
-
-	inputStyle = lipgloss.NewStyle().AlignHorizontal(lipgloss.Left)
-
-	defaultInputColor = lipgloss.Color("#7f7f7f")
-
-	focusedInputColor = lipgloss.Color("#f6359a")
-
-	mnemonicIndexStyle = lipgloss.NewStyle().
-				Width(3).
-				Foreground(lipgloss.Color("#4f4f4f"))
-
-	mnemonicWordIndexStyle = lipgloss.NewStyle().
-				Width(20).
-				AlignHorizontal(lipgloss.Left)
+import (
+	"github.com/charmbracelet/lipgloss"
+	"github.com/viwet/GoDepositCLI/tui"
 )
+
+type style struct {
+	title     lipgloss.Style
+	container lipgloss.Style
+
+	wordContainer lipgloss.Style
+	index         lipgloss.Style
+	word          lipgloss.Style
+	error         lipgloss.Style
+
+	colors tui.Colorscheme
+}
+
+func newStyle(colors tui.Colorscheme) style {
+	return style{
+		title:     lipgloss.NewStyle().Bold(true),
+		container: lipgloss.NewStyle().Padding(1, 0),
+
+		wordContainer: lipgloss.NewStyle().Width(20).AlignHorizontal(lipgloss.Left),
+		index:         lipgloss.NewStyle().Width(3),
+		word:          lipgloss.NewStyle(),
+		error:         lipgloss.NewStyle().Padding(0, 0, 1, 0),
+
+		colors: colors,
+	}
+}

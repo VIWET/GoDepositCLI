@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"runtime"
 	"strconv"
 
 	"github.com/viwet/GoDepositCLI/config"
@@ -105,7 +106,7 @@ func (b *DepositConfigBuilder) EngineWorkers(workers int) *DepositConfigBuilder 
 	if b.cfg.Config == nil {
 		b.cfg.Config = new(Config)
 	}
-	b.cfg.EngineWorkers = max(workers, 1)
+	b.cfg.EngineWorkers = min(max(workers, 1), runtime.NumCPU())
 	return b
 }
 
@@ -221,7 +222,7 @@ func (b *BLSToExecutionConfigBuilder) EngineWorkers(workers int) *BLSToExecution
 	if b.cfg.Config == nil {
 		b.cfg.Config = new(Config)
 	}
-	b.cfg.EngineWorkers = max(workers, 1)
+	b.cfg.EngineWorkers = min(max(workers, 1), runtime.NumCPU())
 	return b
 }
 

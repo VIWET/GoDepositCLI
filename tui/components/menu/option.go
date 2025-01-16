@@ -13,11 +13,3 @@ func NewOption(title string, action func() (tea.Model, tea.Cmd)) Option {
 		action: action,
 	}
 }
-
-func renderSelected(option Option) string {
-	return selectedOptionStyle.Render(option.title)
-}
-
-func renderDefault(option Option) string {
-	return defaultOptionStyle.Render(option.title)
-}

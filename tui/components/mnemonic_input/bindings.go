@@ -1,4 +1,4 @@
-package mnemonicInput
+package mnemonic_input
 
 import (
 	"github.com/charmbracelet/bubbles/key"
@@ -13,8 +13,6 @@ type bindings struct {
 	backspace key.Binding
 	accept    key.Binding
 	quit      key.Binding
-
-	disablePaste key.Binding
 }
 
 func newBindings() bindings {
@@ -50,7 +48,7 @@ func inputBinding(bindings textinput.KeyMap) textinput.KeyMap {
 	bindings.DeleteCharacterForward.SetEnabled(true)
 	bindings.LineStart.SetEnabled(false)
 	bindings.LineEnd.SetEnabled(false)
-	bindings.Paste.SetEnabled(true)
+	bindings.Paste.SetEnabled(false)
 	bindings.AcceptSuggestion.SetEnabled(false)
 	bindings.NextSuggestion.SetEnabled(false)
 	bindings.PrevSuggestion.SetEnabled(false)

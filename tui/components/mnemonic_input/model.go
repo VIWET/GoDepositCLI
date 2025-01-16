@@ -1,7 +1,8 @@
-package mnemonicInput
+package mnemonic_input
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,25 +11,74 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/urfave/cli/v2"
+	bip39 "github.com/viwet/GoBIP39"
+	"github.com/viwet/GoBIP39/words"
+	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
+	"github.com/viwet/GoDepositCLI/tui/components/password"
 )
 
-const columns = 3
+const (
+	mnemonicColumns  = 3
+	mnemonicMinWords = 12
+	mnemonicMaxWords = 24
+)
 
-type Model struct {
+type Model[Config app.ConfigConstraint] struct {
+	ctx   *cli.Context
+	state *app.State[Config]
+	list  words.List
+
+	echo    textinput.EchoMode
+	inputs  []textinput.Model
 	focused int
-	input   []textinput.Model
 
-	binding bindings
-	help    help.Model
+	style    style
+	bindings bindings
+	help     help.Model
+	errorMsg errorMsg
+
+	next tui.NewModel[Config]
 }
 
-func New() *Model {
-	return &Model{
-		input:   []textinput.Model{newInput()},
-		binding: newBindings(),
-		help:    help.New(),
+func NewDepositMnemonicInput() tui.NewModel[app.DepositConfig] {
+	return func(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+		return newModel(ctx, state, state.Config().MnemonicConfig.Language, password.NewDepositPassword())
 	}
+}
+
+func NewBLSToExecutionMnemonicInput() tui.NewModel[app.BLSToExecutionConfig] {
+	return func(ctx *cli.Context, state *app.State[app.BLSToExecutionConfig]) (tea.Model, tea.Cmd) {
+		return newModel(ctx, state, state.Config().MnemonicConfig.Language, password.NewBLSToExecutionPassword())
+	}
+}
+
+func newModel[Config app.ConfigConstraint](
+	ctx *cli.Context,
+	state *app.State[Config],
+	language string,
+	next tui.NewModel[Config],
+) (tea.Model, tea.Cmd) {
+	model := &Model[Config]{
+		ctx:   ctx,
+		state: state,
+		list:  app.LanguageFromMnemonicConfig(&app.MnemonicConfig{Language: language}),
+		echo:  textinput.EchoPassword,
+
+		style:    newStyle(tui.DefaultColorscheme()),
+		bindings: newBindings(),
+		help:     help.New(),
+
+		next: next,
+	}
+
+	if ctx.IsSet(tui.MnemonicFlagName) {
+		m := bip39.SplitMnemonic(strings.TrimSpace(ctx.String(tui.MnemonicFlagName)))
+		return model.onMnemonic(mnemonic{m})
+	}
+
+	return model, model.initInputs()
 }
 
 func newInput() textinput.Model {
@@ -37,213 +87,225 @@ func newInput() textinput.Model {
 	input.Prompt = ""
 	input.Width = 15
 	input.KeyMap = inputBinding(textinput.DefaultKeyMap)
-	input.Validate = func(value string) error {
-		if strings.Contains(value, " ") {
-			return errors.New("paste is not allowed")
-		}
-		return nil
-	}
 	return input
 }
 
-func (m *Model) Value() string {
-	mnemonic := make([]string, len(m.input))
-	for i := range m.input {
-		mnemonic[i] = m.input[i].Value()
-	}
-
-	return strings.Join(mnemonic, " ")
+func (m *Model[Config]) initInputs() tea.Cmd {
+	m.inputs = make([]textinput.Model, 1, mnemonicMaxWords)
+	m.inputs[0] = newInput()
+	m.focused = 0
+	return m.inputs[0].Focus()
 }
 
-func (m *Model) Init() tea.Cmd {
+func (m *Model[Config]) Init() tea.Cmd {
 	return nil
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if !m.input[m.focused].Focused() {
-		return m, m.input[m.focused].Focus()
-	}
-
+func (m *Model[Config]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case errorMsg:
+		m.errorMsg = msg
+	case mnemonic:
+		return m.onMnemonic(msg)
+	case next:
+		return m.onNext(msg)
+	case prev:
+		return m.onPrev(msg)
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.binding.accept):
-			return m, tui.Quit()
-
-		case key.Matches(msg, m.binding.toggle):
-			for i := range len(m.input) {
-				m.input[i].EchoMode ^= 1
-			}
-
+		case key.Matches(msg, m.bindings.accept):
+			return m.onConfirm()
+		case key.Matches(msg, m.bindings.toggle):
+			m.echo ^= 1
 			return m, nil
-
-		case key.Matches(msg, m.binding.next) && m.focused < len(m.input)-1:
-			if m.input[m.focused].Value() == "" {
-				return m, nil
+		case key.Matches(msg, m.bindings.next, m.bindings.space):
+			return m, Next(m.focused)
+		case key.Matches(msg, m.bindings.prev):
+			return m, Prev(m.focused)
+		case key.Matches(msg, m.bindings.backspace):
+			if m.inputs[m.focused].Value() == "" {
+				return m, Prev(m.focused)
 			}
-
-			m.input[m.focused].Blur()
-			m.focused++
-			return m, m.input[m.focused].Focus()
-
-		case key.Matches(msg, m.binding.prev) && m.focused > 0:
-			if m.input[m.focused].Value() == "" {
-				return m, nil
-			}
-
-			m.input[m.focused].Blur()
-			m.focused--
-			return m, m.input[m.focused].Focus()
-
-		case key.Matches(msg, m.binding.space):
-			if m.input[m.focused].Value() == "" {
-				return m, nil
-			}
-
-			if m.focused == len(m.input)-1 {
-				input := newInput()
-				input.EchoMode = m.input[len(m.input)-1].EchoMode
-				m.input = append(m.input, input)
-			}
-
-			m.input[m.focused].Blur()
-			m.focused++
-			return m, m.input[m.focused].Focus()
-
-		case key.Matches(msg, m.binding.backspace) && m.focused > 0 && m.focused == len(m.input)-1 && m.input[m.focused].Value() == "":
-			m.input[m.focused].Blur()
-			m.input = m.input[:m.focused]
-			m.focused--
-			return m, m.input[m.focused].Focus()
-
-		case key.Matches(msg, m.binding.quit):
+		case key.Matches(msg, m.bindings.quit):
 			return m, tui.QuitWithError(errors.New("mnemoinc input canceled"))
 		}
 	}
 
-	return m, m.updateInput(msg)
+	return m, m.updateInputs(msg)
 }
 
-func (m *Model) View() string {
-	return lipgloss.JoinVertical(
-		lipgloss.Left,
-		renderTitle("Mnemonic"),
-		m.renderForm(),
-		renderHelp(m.help, m.binding),
-	)
-}
-
-func (m *Model) updateInput(msg tea.Msg) tea.Cmd {
-	var (
-		cmds     []tea.Cmd
-		inputs   = m.input
-		offset   = 0
-		nonEmpty = 0
-	)
-
-	for i := range len(m.input) {
-		input, cmd := inputs[i].Update(msg)
-		if input.Err != nil {
-			m.input[m.focused].Blur()
-
-			words := strings.Fields(input.Value())
-			newInputs := make([]textinput.Model, len(m.input)-1+len(words))
-
-			// Copy inputs
-			copy(newInputs[:i], inputs[:i])
-			for j := 0; j < len(words); j++ {
-				newInput := newInput()
-				newInput.SetValue(words[j])
-				if len(inputs) > 0 {
-					newInput.EchoMode = inputs[0].EchoMode
-				}
-				newInputs[i+j] = newInput
-				offset++
-			}
-			copy(newInputs[i+len(words):], inputs[i+1:])
-			inputs = newInputs
-
-			m.focused = i + len(words) - 1
-		} else {
-			inputs[i] = input
+func (m *Model[Config]) updateInputs(msg tea.Msg) tea.Cmd {
+	var cmds []tea.Cmd
+	for i := 0; i < len(m.inputs); i++ {
+		var updateCmd, pasteCmd tea.Cmd
+		m.inputs[i], updateCmd = m.inputs[i].Update(msg)
+		if updateCmd != nil {
+			cmds = append(cmds, updateCmd)
 		}
-		
-		if len([]rune(inputs[i].Value())) > 15 {
-			value := inputs[i].Value()
-			inputs[i].SetValue(string(value[:15]))
+		pasteCmd = m.onPaste(i)
+		if pasteCmd != nil {
+			cmds = append(cmds, pasteCmd)
 		}
-
-		if inputs[i].Value() != "" {
-			nonEmpty++
-		}
-
-		cmds = append(cmds, cmd)
 	}
 
-	if nonEmpty%3 == 0 && nonEmpty >= 12 && nonEmpty <= 24 {
-		m.binding.accept.SetEnabled(true)
-	} else {
-		m.binding.accept.SetEnabled(false)
-	}
-
-	m.input = inputs
+	m.checkMnemonic()
 	return tea.Batch(cmds...)
 }
 
-func renderTitle(title string) string {
-	return titleStyle.Render(title)
+func (m *Model[Config]) onPaste(index int) tea.Cmd {
+	words := strings.Fields(strings.TrimSpace(m.inputs[index].Value()))
+	if len(words) < 2 {
+		return nil
+	}
+
+	inputs := make([]textinput.Model, len(m.inputs)+len(words)-1)
+	for i := 0; i < index; i++ {
+		inputs[i] = m.inputs[i]
+		inputs[i].Blur()
+	}
+
+	idx := index
+	for i := 0; i < len(words); i++ {
+		input := newInput()
+		input.SetValue(words[i])
+		inputs[idx] = input
+		idx++
+	}
+
+	for i := index + 1; i < len(m.inputs); i++ {
+		inputs[idx] = m.inputs[i]
+		inputs[idx].Blur()
+		idx++
+	}
+
+	m.inputs = inputs
+	return Next(index + len(words) - 1)
 }
 
-func (m *Model) renderForm() string {
-	return mnemonicSectionContainerStyle.Render(
-		lipgloss.JoinHorizontal(
-			lipgloss.Left,
-			renderInput(m.input, 0, m.focused),
-			renderInput(m.input, 1, m.focused),
-			renderInput(m.input, 2, m.focused),
+func (m *Model[Config]) onMnemonic(msg mnemonic) (tea.Model, tea.Cmd) {
+	m.state.WithMnemonic(msg.mnemonic, m.list)
+	return m.next(m.ctx, m.state)
+}
+
+func (m *Model[Config]) checkMnemonic() {
+	var (
+		words      = len(m.inputs)
+		isInBounds = words <= mnemonicMaxWords && words >= mnemonicMinWords
+		isMultiple = words%3 == 0
+	)
+
+	m.bindings.accept.SetEnabled(isInBounds && isMultiple)
+}
+
+func (m *Model[Config]) onConfirm() (tea.Model, tea.Cmd) {
+	mnemonic := make([]string, len(m.inputs))
+	for i := range m.inputs {
+		mnemonic[i] = m.inputs[i].Value()
+	}
+
+	if err := bip39.ValidateMnemonic(mnemonic, m.list); err != nil {
+		return m, Error(errors.New("invalid mnemonic"))
+	}
+
+	return m, Confirm(mnemonic)
+}
+
+func (m *Model[Config]) onNext(msg next) (tea.Model, tea.Cmd) {
+	index := msg.prev
+	if m.inputs[index].Value() == "" {
+		return m, nil
+	}
+
+	m.inputs[index].Blur()
+	if index+1 == len(m.inputs) {
+		m.inputs = append(m.inputs, newInput())
+	}
+
+	m.focused = index + 1
+	return m, m.inputs[index+1].Focus()
+}
+
+func (m *Model[Config]) onPrev(msg prev) (tea.Model, tea.Cmd) {
+	index := msg.next
+	if index == 0 {
+		return m, nil
+	}
+
+	if m.inputs[index].Value() == "" {
+		if index != len(m.inputs)-1 {
+			return m, nil
+		}
+		m.inputs[index].Blur()
+		m.inputs = m.inputs[:len(m.inputs)-1]
+	} else {
+		m.inputs[index].Blur()
+	}
+
+	m.focused = index - 1
+	return m, m.inputs[index-1].Focus()
+}
+
+func (m *Model[Config]) View() string {
+	return lipgloss.JoinVertical(
+		lipgloss.Left,
+		m.style.title.Foreground(m.style.colors.Title).Render("Mnemonic"),
+		m.style.container.Render(
+			lipgloss.JoinHorizontal(lipgloss.Bottom, m.mnemonicColumnsView()...),
 		),
+		m.errorView(),
+		m.help.View(m.bindings),
 	)
 }
 
-func renderInput(input []textinput.Model, column, focused int) string {
+func (m *Model[Config]) errorView() string {
+	if m.errorMsg.err != nil {
+		return m.style.error.Foreground(m.style.colors.Error).Render(
+			fmt.Sprintf("[Error]: %s", m.errorMsg.err.Error()),
+		)
+	}
+	return ""
+}
+
+func (m *Model[Config]) mnemonicColumnsView() []string {
+	views := make([]string, mnemonicColumns)
+	for column := range mnemonicColumns {
+		views[column] = m.mnemonicColumnView(column)
+	}
+
+	return views
+}
+
+func (m *Model[Config]) mnemonicColumnView(column int) string {
 	var (
-		rows       = len(input)/columns + 1
-		views      = make([]string, 0, rows)
-		inputStyle = inputStyle.Foreground(defaultInputColor)
+		rows  = len(m.inputs)/mnemonicColumns + 1
+		views = make([]string, rows)
 	)
 
 	for row := range rows {
-		index := row*columns + column
-
-		if index >= len(input) {
+		index := row*mnemonicColumns + column
+		if index >= len(m.inputs) {
 			break
 		}
 
-		var word string
-		if index == focused {
-			word = renderWordWithIndex(inputStyle.Foreground(focusedInputColor).Render(input[index].View()), index+1)
-		} else {
-			word = renderWordWithIndex(inputStyle.Render(input[index].View()), index+1)
-		}
-		views = append(views, word)
+		views[row] = m.wordView(index)
 	}
 
-	return lipgloss.JoinVertical(
-		lipgloss.Left,
-		views...,
-	)
+	return lipgloss.JoinVertical(lipgloss.Left, views...)
 }
 
-func renderWordWithIndex(word string, index int) string {
-	return mnemonicWordIndexStyle.Render(
+func (m *Model[Config]) wordView(index int) string {
+	input := m.inputs[index]
+	input.TextStyle = m.style.word.Foreground(m.style.colors.Title)
+	if input.Focused() {
+		input.TextStyle = m.style.word.Foreground(m.style.colors.Accent)
+	}
+
+	input.EchoMode = m.echo
+	return m.style.wordContainer.Render(
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			mnemonicIndexStyle.Render(strconv.Itoa(index)),
-			word,
+			m.style.index.Foreground(m.style.colors.Text).Render(strconv.Itoa(index+1)),
+			input.View(),
 		),
 	)
-}
-
-func renderHelp(help help.Model, binding help.KeyMap) string {
-	return help.View(binding)
 }

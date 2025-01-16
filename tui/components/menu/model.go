@@ -1,10 +1,13 @@
 package menu
 
 import (
+	"errors"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/viwet/GoDepositCLI/tui"
 )
 
 type Model struct {
@@ -13,16 +16,19 @@ type Model struct {
 	options []Option
 	focused int
 
-	binding bindings
-	help    help.Model
+	bindings bindings
+	style    style
+
+	help help.Model
 }
 
 func New(title string, options ...Option) Model {
 	return Model{
-		title:   title,
-		options: options,
-		binding: newBindings(),
-		help:    help.New(),
+		title:    title,
+		options:  options,
+		bindings: newBindings(),
+		style:    newStyle(tui.DefaultColorscheme()),
+		help:     help.New(),
 	}
 }
 
@@ -34,18 +40,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.binding.up):
+		case key.Matches(msg, m.bindings.up):
 			m.focused = max(m.focused-1, 0)
-		case key.Matches(msg, m.binding.down):
+		case key.Matches(msg, m.bindings.down):
 			m.focused = min(m.focused+1, len(m.options)-1)
-		case key.Matches(msg, m.binding.accept):
-			model, cmd := m.options[m.focused].action()
-			if model != nil {
-				return model, cmd
-			}
-			return m, cmd
-		case key.Matches(msg, m.binding.quit):
-			return m, tea.Quit
+		case key.Matches(msg, m.bindings.accept):
+			return m.options[m.focused].action()
+		case key.Matches(msg, m.bindings.quit):
+			return m, tui.QuitWithError(errors.New("selection canceled"))
 		}
 	}
 
@@ -55,34 +57,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		renderTitle(m.title),
-		renderOptions(m.options, m.focused),
-		renderHelp(m.help, m.binding),
+		m.style.title.Foreground(m.style.colors.Title).Render(m.title),
+		m.style.container.Render(
+			lipgloss.JoinVertical(lipgloss.Left, m.optionsView()...),
+		),
+		m.help.View(m.bindings),
 	)
 }
 
-func renderTitle(title string) string {
-	return titleStyle.Render(title)
-}
+func (m Model) optionsView() []string {
+	var (
+		views    = make([]string, len(m.options))
+		selected = m.style.selected.Foreground(m.style.colors.Accent).Render
+		option   = m.style.option.Foreground(m.style.colors.Text).Render
+	)
 
-func renderOptions(options []Option, focused int) string {
-	views := make([]string, len(options))
-	for i, opt := range options {
-		if i == focused {
-			views[i] = renderSelected(opt)
+	for i, opt := range m.options {
+		if i == m.focused {
+			views[i] = selected(opt.title)
 		} else {
-			views[i] = renderDefault(opt)
+			views[i] = option(opt.title)
 		}
 	}
 
-	return optionsSectionContainerStyle.Render(
-		lipgloss.JoinVertical(
-			lipgloss.Left,
-			views...,
-		),
-	)
-}
-
-func renderHelp(help help.Model, binding help.KeyMap) string {
-	return help.View(binding)
+	return views
 }

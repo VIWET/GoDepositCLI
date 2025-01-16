@@ -112,7 +112,10 @@ var blsToExecutionFlags = []cli.Flag{
 	ChainGenesisForkVersionFlag,
 	ChainGenesisValidatorsRootFlag,
 	MnemonicLanguageFlag,
+	MnemonicFlag,
 	DirectoryFlag,
 	WithdrawalAddressesFlag,
 	ValidatorIndicesFlag,
+
+	PasswordFlag,
 }
