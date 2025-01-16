@@ -20,6 +20,18 @@ make
 make NETWORK=ethereum
 ```
 
+## TODO
+
+- [ ] Config form terminal UI
+
+- [ ] Colorschemes
+
+- [ ] Mnemonic input refactoring
+
+- [ ] Password generation
+
+- [ ] Execution and Consensus layer clients
+
 ## Deposit generation
 
 ![Deposits generation](images/demo.gif)
