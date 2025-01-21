@@ -2,16 +2,9 @@ default: build
 
 NETWORK ?= bahamut
 
-GIT_VERSION=$(shell git describe --tags --always | sed 's/[\.,-]/ /g' | tr -d 'v')
+GIT_VERSION=$(shell git describe --tags --always)
 
-GIT_MAJOR=$(word 1, $(GIT_VERSION))
-GIT_MINOR=$(word 2, $(GIT_VERSION))
-GIT_PATCH=$(word 3, $(GIT_VERSION))
-
-LDFLAGS = \
-	-X 'github.com/viwet/GoDepositCLI/version.Major=$(GIT_MAJOR)' \
-	-X 'github.com/viwet/GoDepositCLI/version.Minor=$(GIT_MINOR)' \
-	-X 'github.com/viwet/GoDepositCLI/version.Patch=$(GIT_PATCH)'
+LDFLAGS = -X github.com/viwet/GoDepositCLI/version.GitVersion=$(GIT_VERSION)
 
 .PHONY: test
 test: generate
