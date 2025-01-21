@@ -24,6 +24,7 @@ run: generate
 .PHONY: build
 build: generate
 	go build -ldflags='$(LDFLAGS)' -tags '$(NETWORK)' -o ./bin/staking-cli .
+	@echo "\nRun staking-cli using './bin/staking-cli' command"
 
 .PHONY: generate
 generate:
