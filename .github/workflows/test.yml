@@ -5,11 +5,25 @@ on:
 
 jobs:
   test:
+    name: test
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - uses: actions/checkout@v2
+
       - run: make test
+
+  test-ethereum:
+    name: test-ethereum
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
       - run: make test NETWORK=ethereum

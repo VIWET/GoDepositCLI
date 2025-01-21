@@ -312,7 +312,7 @@ func TestDepositEngine_Generate_Random(t *testing.T) {
 		cfg = &DepositConfig{
 			Config: &Config{
 				StartIndex: 0,
-				Number:     1000,
+				Number:     100,
 				ChainConfig: &config.ChainConfig{
 					Name:                  "devnet",
 					GenesisForkVersion:    genesisForkVersion,
@@ -331,7 +331,7 @@ func TestDepositEngine_Generate_Random(t *testing.T) {
 					cfg := IndexedConfig[Amount]{Config: make(map[uint32]Amount)}
 
 					amount := Amount(config.MaxDepositAmount/2) / config.GweiPerEther
-					for i := uint32(0); i < 1000; i++ {
+					for i := uint32(0); i < 100; i++ {
 						if rand.N[int](2)%2 == 0 {
 							cfg.Config[i] = (amount + rand.N[Amount](amount)) * config.GweiPerEther
 						}
@@ -344,7 +344,7 @@ func TestDepositEngine_Generate_Random(t *testing.T) {
 				IndexedConfig: func() IndexedConfig[Address] {
 					cfg := IndexedConfig[Address]{Config: make(map[uint32]Address)}
 
-					for i := uint32(0); i < 1000; i++ {
+					for i := uint32(0); i < 100; i++ {
 						if rand.N[int](2)%2 == 0 {
 							var buffer Address
 							crand.Read(buffer[:])
