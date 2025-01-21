@@ -1,0 +1,25 @@
+run:
+  timeout: 1m
+  tests: true
+
+linters:
+  disable-all: true
+  enable:
+    - goimports
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - unconvert
+    - typecheck
+    - unused
+    - staticcheck
+    - bidichk
+    - durationcheck
+    - whitespace
+    - gocheckcompilerdirectives
+    - reassign
+    - mirror
+
+issues:
+  exclude-use-default: true

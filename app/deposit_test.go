@@ -154,7 +154,6 @@ func Test_GenerateDeposits(t *testing.T) {
 		if d.WithdrawalCredentials[0] != 0x01 && !bytes.Equal(d.WithdrawalCredentials[12:], withdrawalAddress[:]) {
 			t.Fatal("invalid withdrawal address")
 		}
-
 	}
 }
 
@@ -294,7 +293,6 @@ func TestDepositEngine_Generate(t *testing.T) {
 		if d.WithdrawalCredentials[0] != 0x01 && !bytes.Equal(d.WithdrawalCredentials[12:], withdrawalAddress[:]) {
 			t.Fatal("invalid withdrawal address")
 		}
-
 	}
 }
 
@@ -437,6 +435,5 @@ func TestDepositEngine_Generate_Random(t *testing.T) {
 		if d.WithdrawalCredentials[0] == 0x01 && !bytes.Equal(d.WithdrawalCredentials[12:], withdrawalAddress[:]) {
 			t.Fatalf("invalid withdrawal address - want: 0x%x, got: 0x%x", withdrawalAddress[:], d.WithdrawalCredentials[12:])
 		}
-
 	}
 }

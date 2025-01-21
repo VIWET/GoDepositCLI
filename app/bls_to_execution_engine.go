@@ -65,6 +65,7 @@ func (e *BLSToExecutionEngine) Generate(ctx context.Context) ([]*types.SignedBLS
 	return e.collectMessages(ctx, results)
 }
 
+//nolint:unused
 func (e *BLSToExecutionEngine) onBLSToExecution(m *BLSToExecution) error {
 	if e.onBLSToExecutionFunc != nil {
 		return e.onBLSToExecutionFunc(m)
