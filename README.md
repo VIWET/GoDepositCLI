@@ -6,17 +6,21 @@ CLI for generating of Bahamut chain and Ethereum 2.0 keys written in Golang
 
 ### Requirements
 
+- make
+
 - go v1.23.3
 
 ### Build for Bahamut chain
 
 ```Bash
+git clone https://github.com/VIWET/GoDepositCLI.git && cd GoDepositCLI
 make
 ```
 
 ### Build for Ethereum
 
 ```Bash
+git clone https://github.com/VIWET/GoDepositCLI.git && cd GoDepositCLI
 make NETWORK=ethereum
 ```
 
