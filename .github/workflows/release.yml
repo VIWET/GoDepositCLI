@@ -1,0 +1,24 @@
+name: release
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - run: git fetch --prune --unshallow
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: release publish bahamut
+        run: GITHUB_TOKEN={{secrets.GORELEASER_ACCESS_TOKEN}} NETWORK=bahamut make release
+
+      - name: release publish ethereum
+        run: GITHUB_TOKEN={{secrets.GORELEASER_ACCESS_TOKEN}} NETWORK=ethereum make release
