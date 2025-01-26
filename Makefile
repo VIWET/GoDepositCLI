@@ -32,6 +32,7 @@ clean:
 release: check_github_token
 	@docker run \
 		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(ROOT_DIR):/go/src/staking-cli \
 		-e GITHUB_TOKEN=$(GITHUB_TOKEN) \
 		-e NETWORK=$(NETWORK) \
