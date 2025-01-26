@@ -1,6 +1,7 @@
 default: build
 
 NETWORK ?= bahamut
+GOLANG_CROSS_VERSION ?= v1.23
 
 GIT_VERSION=$(shell git describe --tags --always)
 ROOT_DIR=$(shell pwd)
@@ -33,14 +34,13 @@ release: check_github_token
 	@docker run \
 		--rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(HOME)/.docker/config.json:/root/.docker/config.json \
 		-v $(ROOT_DIR):/go/src/staking-cli \
 		-e GITHUB_TOKEN=$(GITHUB_TOKEN) \
 		-e NETWORK=$(NETWORK) \
 		-w /go/src/staking-cli \
-		goreleaser/goreleaser-cross release \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION}  release \
 		--clean \
-		--skip=publish \
-		--skip=validate
 
 check_github_token:
 	@[ "${GITHUB_TOKEN}" ] || ( echo "GITHUB_TOKEN wasn't provided"; exit 1 )

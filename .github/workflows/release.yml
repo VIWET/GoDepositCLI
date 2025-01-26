@@ -17,8 +17,21 @@ jobs:
         with:
           go-version: stable
 
+      - name: docker-login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.repository_owner}}
+          password: ${{secrets.CR_PAT}}
+
       - name: release publish bahamut
-        run: GITHUB_TOKEN={{secrets.GORELEASER_ACCESS_TOKEN}} NETWORK=bahamut make release
+        env:
+          GITHUB_TOKEN: ${{secrets.GORELEASER_ACCESS_TOKEN}}
+          NETWORK: bahamut
+        run: make release
 
       - name: release publish ethereum
-        run: GITHUB_TOKEN={{secrets.GORELEASER_ACCESS_TOKEN}} NETWORK=ethereum make release
+        env:
+          GITHUB_TOKEN: ${{secrets.GORELEASER_ACCESS_TOKEN}}
+          NETWORK: ethereum
+        run: make release
