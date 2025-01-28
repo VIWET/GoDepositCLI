@@ -39,7 +39,7 @@ release: check_github_token
 		-e GITHUB_TOKEN=$(GITHUB_TOKEN) \
 		-e NETWORK=$(NETWORK) \
 		-w /go/src/staking-cli \
-		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION}  release \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} release \
 		--clean \
 
 check_github_token:

@@ -24,14 +24,8 @@ jobs:
           username: ${{github.repository_owner}}
           password: ${{secrets.CR_PAT}}
 
-      - name: release publish bahamut
+      - name: release
         env:
           GITHUB_TOKEN: ${{secrets.GORELEASER_ACCESS_TOKEN}}
           NETWORK: bahamut
-        run: make release
-
-      - name: release publish ethereum
-        env:
-          GITHUB_TOKEN: ${{secrets.GORELEASER_ACCESS_TOKEN}}
-          NETWORK: ethereum
         run: make release
