@@ -34,7 +34,6 @@ builds:
       {{- end }}
     goos:
     - linux
-    - darwin
     - windows
     goarch:
     - amd64
@@ -76,9 +75,9 @@ builds:
       {{- if eq .Os "windows" }}
         {{- if eq .Arch "amd64" }}CXX=x86_64-w64-mingw32-g++{{- end }}
       {{- end }}
+
     goos:
     - linux
-    - darwin
     - windows
     goarch:
     - amd64
