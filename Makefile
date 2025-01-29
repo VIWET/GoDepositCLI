@@ -1,17 +1,12 @@
 default: build
 
 NETWORK ?= bahamut
+GOLANG_CROSS_VERSION ?= v1.23
 
-GIT_VERSION=$(shell git describe --tags --always | sed 's/[\.,-]/ /g' | tr -d 'v')
+GIT_VERSION=$(shell git describe --tags --always)
+ROOT_DIR=$(shell pwd)
 
-GIT_MAJOR=$(word 1, $(GIT_VERSION))
-GIT_MINOR=$(word 2, $(GIT_VERSION))
-GIT_PATCH=$(word 3, $(GIT_VERSION))
-
-LDFLAGS = \
-	-X 'github.com/viwet/GoDepositCLI/version.Major=$(GIT_MAJOR)' \
-	-X 'github.com/viwet/GoDepositCLI/version.Minor=$(GIT_MINOR)' \
-	-X 'github.com/viwet/GoDepositCLI/version.Patch=$(GIT_PATCH)'
+LDFLAGS = -X github.com/viwet/GoDepositCLI/version.GitVersion=$(GIT_VERSION)
 
 .PHONY: test
 test: generate
@@ -33,3 +28,19 @@ generate:
 .PHONY: clean
 clean:
 	rm -rf ./bin
+
+.PHONY: release
+release: check_github_token
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(HOME)/.docker/config.json:/root/.docker/config.json \
+		-v $(ROOT_DIR):/go/src/staking-cli \
+		-e GITHUB_TOKEN=$(GITHUB_TOKEN) \
+		-e NETWORK=$(NETWORK) \
+		-w /go/src/staking-cli \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} release \
+		--clean \
+
+check_github_token:
+	@[ "${GITHUB_TOKEN}" ] || ( echo "GITHUB_TOKEN wasn't provided"; exit 1 )
