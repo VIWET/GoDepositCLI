@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/viwet/GoDepositCLI/bls"
 	"github.com/viwet/GoDepositCLI/config"
@@ -59,14 +60,14 @@ func NewBLSToExecution(
 }
 
 type BLSToExecutionJSON struct {
-	ValidatorIndex     uint64      `json:"validator_index"`
+	ValidatorIndex     string      `json:"validator_index"`
 	FromBLSPublicKey   helpers.Hex `json:"from_bls_pubkey"`
 	ToExecutionAddress helpers.Hex `json:"to_execution_address"`
 }
 
 func (m *BLSToExecution) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&BLSToExecutionJSON{
-		m.ValidatorIndex,
+		strconv.FormatUint(m.ValidatorIndex, 10),
 		m.FromBLSPublicKey,
 		m.ToExecutionAddress,
 	})
