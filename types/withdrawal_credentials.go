@@ -9,7 +9,7 @@ import (
 
 // BLSWithdrawalCredentials returns credentials from BLS SecretKey
 func BLSWithdrawalCredentials(withdrawal bls.SecretKey) []byte {
-	hash := sha256.Sum256(withdrawal.Marshal())
+	hash := sha256.Sum256(withdrawal.PublicKey().Marshal())
 	credentials := make([]byte, config.HashLength)
 	credentials[0] = config.BLSWithdrawalPrefix
 	copy(credentials[1:], hash[1:])
