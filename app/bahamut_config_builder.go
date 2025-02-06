@@ -52,7 +52,7 @@ func (b *DepositConfigBuilder) buildContractAddresses() error {
 		return nil
 	}
 
-	if err := helpers.ParseIndexedValues(onDefault, onIndexed, b.amounts...); err != nil {
+	if err := helpers.ParseIndexedValues(onDefault, onIndexed, b.contractAddresses...); err != nil {
 		return err
 	}
 
