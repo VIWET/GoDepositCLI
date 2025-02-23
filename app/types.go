@@ -128,10 +128,10 @@ func (a *Amount) MarshalJSON() ([]byte, error) {
 
 // FromString parses value from string (optionally with prefix)
 func (a *Amount) FromString(amount string) error {
-	suffix, modifier := "", uint64(1)
+	suffix, modifier := "", uint64(config.GweiPerEther)
 	switch {
 	case strings.HasSuffix(amount, config.GweiSuffix):
-		suffix = config.GweiSuffix
+		suffix, modifier = config.GweiSuffix, 1
 	case strings.HasSuffix(amount, config.TokenSuffix):
 		suffix, modifier = config.TokenSuffix, config.GweiPerEther
 	}

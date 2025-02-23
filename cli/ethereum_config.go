@@ -21,14 +21,6 @@ func newDepositConfigFromFlags(cmd *cli.Command) (*app.DepositConfig, error) {
 	}
 
 	if cmd.IsSet(ChainGenesisForkVersionFlag.Name) {
-		forkVersion, err := hex.DecodeString(strings.TrimPrefix(cmd.String(ChainGenesisForkVersionFlag.Name), "0x"))
-		if err != nil {
-			return nil, err
-		}
-		builder.GenesisForkVersion(forkVersion)
-	}
-
-	if cmd.IsSet(ChainGenesisForkVersionFlag.Name) {
 		forkVersion, err := hex.DecodeString(
 			strings.TrimPrefix(
 				cmd.String(ChainGenesisForkVersionFlag.Name),
@@ -42,7 +34,7 @@ func newDepositConfigFromFlags(cmd *cli.Command) (*app.DepositConfig, error) {
 	}
 
 	if cmd.IsSet(ChainGenesisValidatorsRootFlag.Name) {
-		forkVersion, err := hex.DecodeString(
+		validatorsRoot, err := hex.DecodeString(
 			strings.TrimPrefix(
 				cmd.String(ChainGenesisValidatorsRootFlag.Name),
 				"0x",
@@ -51,7 +43,7 @@ func newDepositConfigFromFlags(cmd *cli.Command) (*app.DepositConfig, error) {
 		if err != nil {
 			return nil, err
 		}
-		builder.GenesisForkVersion(forkVersion)
+		builder.GenesisValidatorsRoot(validatorsRoot)
 	}
 
 	builder.MnemonicLanguage(cmd.String(MnemonicLanguageFlag.Name))

@@ -44,7 +44,7 @@ func TestAmount(t *testing.T) {
 		},
 		{
 			name:  "string",
-			value: 42,
+			value: 42 * config.GweiPerEther,
 			input: "\"42\"",
 		},
 		{

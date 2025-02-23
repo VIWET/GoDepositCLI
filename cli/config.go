@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/urfave/cli/v3"
@@ -30,6 +31,8 @@ func newDepositConfigFromFile(cmd *cli.Command) (*app.DepositConfig, error) {
 	if err := json.NewDecoder(file).Decode(cfg); err != nil {
 		return nil, err
 	}
+
+	cfg.EngineWorkers = min(max(int(cmd.Int(EngineWorkersFlag.Name)), 1), runtime.NumCPU())
 
 	if err := app.EnsureDepositConfigIsValid(cfg); err != nil {
 		return nil, err
