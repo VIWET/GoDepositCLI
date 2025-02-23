@@ -62,6 +62,8 @@ func newBLSToExecutionConfigFromFile(cmd *cli.Command) (*app.BLSToExecutionConfi
 		return nil, err
 	}
 
+	cfg.EngineWorkers = min(max(int(cmd.Int(EngineWorkersFlag.Name)), 1), runtime.NumCPU())
+
 	if err := app.EnsureBLSToExecutionConfigIsValid(cfg); err != nil {
 		return nil, err
 	}
@@ -80,14 +82,6 @@ func newBLSToExecutionConfigFromFlags(cmd *cli.Command) (*app.BLSToExecutionConf
 	}
 
 	if cmd.IsSet(ChainGenesisForkVersionFlag.Name) {
-		forkVersion, err := hex.DecodeString(strings.TrimPrefix(cmd.String(ChainGenesisForkVersionFlag.Name), "0x"))
-		if err != nil {
-			return nil, err
-		}
-		builder.GenesisForkVersion(forkVersion)
-	}
-
-	if cmd.IsSet(ChainGenesisForkVersionFlag.Name) {
 		forkVersion, err := hex.DecodeString(
 			strings.TrimPrefix(
 				cmd.String(ChainGenesisForkVersionFlag.Name),
@@ -101,7 +95,7 @@ func newBLSToExecutionConfigFromFlags(cmd *cli.Command) (*app.BLSToExecutionConf
 	}
 
 	if cmd.IsSet(ChainGenesisValidatorsRootFlag.Name) {
-		forkVersion, err := hex.DecodeString(
+		validatorsRoot, err := hex.DecodeString(
 			strings.TrimPrefix(
 				cmd.String(ChainGenesisValidatorsRootFlag.Name),
 				"0x",
@@ -110,7 +104,7 @@ func newBLSToExecutionConfigFromFlags(cmd *cli.Command) (*app.BLSToExecutionConf
 		if err != nil {
 			return nil, err
 		}
-		builder.GenesisForkVersion(forkVersion)
+		builder.GenesisValidatorsRoot(validatorsRoot)
 	}
 
 	builder.MnemonicLanguage(cmd.String(MnemonicLanguageFlag.Name))
