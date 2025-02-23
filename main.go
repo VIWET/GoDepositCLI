@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -8,7 +9,9 @@ import (
 )
 
 func main() {
-	if err := cli.NewApp().Run(os.Args); err != nil {
+	ctx := context.Background()
+
+	if err := cli.NewApp().Run(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

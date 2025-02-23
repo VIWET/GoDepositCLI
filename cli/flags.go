@@ -3,7 +3,7 @@ package cli
 import (
 	"runtime"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (
@@ -14,7 +14,7 @@ var (
 
 	EngineWorkersFlag = &cli.IntFlag{
 		Name:  "engine-workers",
-		Value: runtime.NumCPU(),
+		Value: int64(runtime.NumCPU()),
 	}
 
 	StartIndexFlag = &cli.UintFlag{

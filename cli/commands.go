@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/urfave/cli/v2"
+import "github.com/urfave/cli/v3"
 
 var (
 	commands = []*cli.Command{DepositCommand, BLSToExecutionCommand}
@@ -24,7 +24,7 @@ var (
 	DepositCommand = &cli.Command{
 		Name:  "deposit",
 		Usage: "Generate deposits using new mnemonic or existing one",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			NewMnemonicCommand,
 			ExistingMnemonicCommand,
 		},

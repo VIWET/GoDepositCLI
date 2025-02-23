@@ -1,6 +1,7 @@
 package mnemonic_input
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	bip39 "github.com/viwet/GoBIP39"
 	"github.com/viwet/GoBIP39/words"
 	"github.com/viwet/GoDepositCLI/app"
@@ -26,7 +27,9 @@ const (
 )
 
 type Model[Config app.ConfigConstraint] struct {
-	ctx   *cli.Context
+	ctx    context.Context
+	clicmd *cli.Command
+
 	state *app.State[Config]
 	list  words.List
 
@@ -43,28 +46,42 @@ type Model[Config app.ConfigConstraint] struct {
 }
 
 func NewDepositMnemonicInput() tui.NewModel[app.DepositConfig] {
-	return func(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
-		return newModel(ctx, state, state.Config().MnemonicConfig.Language, password.NewDepositPassword())
+	return func(ctx context.Context, cmd *cli.Command, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+		return newModel(
+			ctx,
+			cmd,
+			state,
+			state.Config().MnemonicConfig.Language,
+			password.NewDepositPassword(),
+		)
 	}
 }
 
 func NewBLSToExecutionMnemonicInput() tui.NewModel[app.BLSToExecutionConfig] {
-	return func(ctx *cli.Context, state *app.State[app.BLSToExecutionConfig]) (tea.Model, tea.Cmd) {
-		return newModel(ctx, state, state.Config().MnemonicConfig.Language, password.NewBLSToExecutionPassword())
+	return func(ctx context.Context, cmd *cli.Command, state *app.State[app.BLSToExecutionConfig]) (tea.Model, tea.Cmd) {
+		return newModel(
+			ctx,
+			cmd,
+			state,
+			state.Config().MnemonicConfig.Language,
+			password.NewBLSToExecutionPassword(),
+		)
 	}
 }
 
 func newModel[Config app.ConfigConstraint](
-	ctx *cli.Context,
+	ctx context.Context,
+	cmd *cli.Command,
 	state *app.State[Config],
 	language string,
 	next tui.NewModel[Config],
 ) (tea.Model, tea.Cmd) {
 	model := &Model[Config]{
-		ctx:   ctx,
-		state: state,
-		list:  app.LanguageFromMnemonicConfig(&app.MnemonicConfig{Language: language}),
-		echo:  textinput.EchoPassword,
+		ctx:    ctx,
+		clicmd: cmd,
+		state:  state,
+		list:   app.LanguageFromMnemonicConfig(&app.MnemonicConfig{Language: language}),
+		echo:   textinput.EchoPassword,
 
 		style:    newStyle(tui.DefaultColorscheme()),
 		bindings: newBindings(),
@@ -73,8 +90,8 @@ func newModel[Config app.ConfigConstraint](
 		next: next,
 	}
 
-	if ctx.IsSet(tui.MnemonicFlagName) {
-		m := bip39.SplitMnemonic(strings.TrimSpace(ctx.String(tui.MnemonicFlagName)))
+	if cmd.IsSet(tui.MnemonicFlagName) {
+		m := bip39.SplitMnemonic(strings.TrimSpace(cmd.String(tui.MnemonicFlagName)))
 		return model.onMnemonic(mnemonic{m})
 	}
 
@@ -184,7 +201,7 @@ func (m *Model[Config]) onPaste(index int) tea.Cmd {
 
 func (m *Model[Config]) onMnemonic(msg mnemonic) (tea.Model, tea.Cmd) {
 	m.state.WithMnemonic(msg.mnemonic, m.list)
-	return m.next(m.ctx, m.state)
+	return m.next(m.ctx, m.clicmd, m.state)
 }
 
 func (m *Model[Config]) checkMnemonic() {

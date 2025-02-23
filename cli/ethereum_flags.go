@@ -2,7 +2,7 @@
 
 package cli
 
-import "github.com/urfave/cli/v2"
+import "github.com/urfave/cli/v3"
 
 var (
 	depositNewMnemonicFlags = []cli.Flag{

@@ -7,14 +7,15 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
 )
 
 type Model struct {
-	ctx    *cli.Context
+	ctx    context.Context
 	cancel context.CancelFunc
+	clicmd *cli.Command
 
 	ticks     <-chan deposit
 	increment float64
@@ -26,12 +27,13 @@ type Model struct {
 	progress progress.Model
 }
 
-func New(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
-	engineCtx, engineCancel := context.WithCancel(ctx.Context)
+func New(ctx context.Context, cmd *cli.Command, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+	engineCtx, engineCancel := context.WithCancel(ctx)
 	result, ticks := RunEngine(engineCtx, state)
 	return &Model{
 		ctx:       ctx,
 		cancel:    engineCancel,
+		clicmd:    cmd,
 		ticks:     ticks,
 		increment: 1.0 / float64(state.Config().Number),
 		dir:       state.Config().Directory,

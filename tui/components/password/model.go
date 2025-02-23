@@ -1,6 +1,7 @@
 package password
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
 	"github.com/viwet/GoDepositCLI/tui/components/bls"
@@ -17,8 +18,9 @@ import (
 )
 
 type Model[Config app.ConfigConstraint] struct {
-	ctx   *cli.Context
-	state *app.State[Config]
+	ctx    context.Context
+	clicmd *cli.Command
+	state  *app.State[Config]
 
 	password textinput.Model
 	confirm  textinput.Model
@@ -31,27 +33,33 @@ type Model[Config app.ConfigConstraint] struct {
 }
 
 func NewDepositPassword() tui.NewModel[app.DepositConfig] {
-	return func(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
-		return newModel(ctx, state, deposits.New)
+	return func(ctx context.Context, cmd *cli.Command, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+		return newModel(ctx, cmd, state, deposits.New)
 	}
 }
 
 func NewBLSToExecutionPassword() tui.NewModel[app.BLSToExecutionConfig] {
-	return func(ctx *cli.Context, state *app.State[app.BLSToExecutionConfig]) (tea.Model, tea.Cmd) {
-		return newModel(ctx, state, bls.New)
+	return func(ctx context.Context, cmd *cli.Command, state *app.State[app.BLSToExecutionConfig]) (tea.Model, tea.Cmd) {
+		return newModel(ctx, cmd, state, bls.New)
 	}
 }
 
-func newModel[Config app.ConfigConstraint](ctx *cli.Context, state *app.State[Config], next tui.NewModel[Config]) (tea.Model, tea.Cmd) {
-	if ctx.IsSet(tui.PasswordFlagName) {
-		password := ctx.String(tui.PasswordFlagName)
+func newModel[Config app.ConfigConstraint](
+	ctx context.Context,
+	cmd *cli.Command,
+	state *app.State[Config],
+	next tui.NewModel[Config],
+) (tea.Model, tea.Cmd) {
+	if cmd.IsSet(tui.PasswordFlagName) {
+		password := cmd.String(tui.PasswordFlagName)
 		state.WithPassword(password)
-		return next(ctx, state)
+		return next(ctx, cmd, state)
 	}
 
 	model := &Model[Config]{
-		ctx:   ctx,
-		state: state,
+		ctx:    ctx,
+		clicmd: cmd,
+		state:  state,
 
 		password: newInput(),
 		confirm:  newInput(),
@@ -128,7 +136,7 @@ func (m *Model[Config]) onConfirm(msg confirm) (tea.Model, tea.Cmd) {
 		m.confirm.Err = msg.confirmation
 		if msg.validation == nil && msg.confirmation == nil {
 			m.state.WithPassword(m.password.Value())
-			return m.next(m.ctx, m.state)
+			return m.next(m.ctx, m.clicmd, m.state)
 		}
 	}
 
