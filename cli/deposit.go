@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/io"
 	"github.com/viwet/GoDepositCLI/tui"
@@ -11,21 +11,25 @@ import (
 	mnemonicInput "github.com/viwet/GoDepositCLI/tui/components/mnemonic_input"
 )
 
-func GenerateDepositsFromNewMnemonic(ctx *cli.Context) error {
-	cfg, err := NewDepositConfigFromCLI(ctx)
+func GenerateDepositsFromNewMnemonic(ctx context.Context, cmd *cli.Command) error {
+	cfg, err := NewDepositConfigFromCLI(cmd)
 	if err != nil {
 		return err
 	}
 
 	state := app.NewState(cfg)
-	if ctx.Bool(NonInteractiveFlag.Name) {
-		return generateDepositsFromNewMnemonicNonInteractive(ctx, state)
+	if cmd.Bool(NonInteractiveFlag.Name) {
+		return generateDepositsFromNewMnemonicNonInteractive(ctx, cmd, state)
 	}
 
-	return tui.Run(ctx, state, mnemonic.New)
+	return tui.Run(ctx, cmd, state, mnemonic.New)
 }
 
-func generateDepositsFromNewMnemonicNonInteractive(ctx *cli.Context, state *app.State[app.DepositConfig]) error {
+func generateDepositsFromNewMnemonicNonInteractive(
+	ctx context.Context,
+	cmd *cli.Command,
+	state *app.State[app.DepositConfig],
+) error {
 	mnemonic, list, err := app.GenerateMnemonic(state)
 	if err != nil {
 		return err
@@ -33,43 +37,47 @@ func generateDepositsFromNewMnemonicNonInteractive(ctx *cli.Context, state *app.
 
 	state.WithMnemonic(mnemonic, list)
 
-	password, err := ReadPassword(ctx)
+	password, err := ReadPassword(cmd)
 	if err != nil {
 		return err
 	}
 
 	ShowMnemonic(state)
 
-	return generateDeposits(ctx.Context, state.WithPassword(password))
+	return generateDeposits(ctx, state.WithPassword(password))
 }
 
-func GenerateDepositsFromExistingMnemonic(ctx *cli.Context) error {
-	cfg, err := NewDepositConfigFromCLI(ctx)
+func GenerateDepositsFromExistingMnemonic(ctx context.Context, cmd *cli.Command) error {
+	cfg, err := NewDepositConfigFromCLI(cmd)
 	if err != nil {
 		return err
 	}
 
 	state := app.NewState(cfg)
-	if ctx.Bool(NonInteractiveFlag.Name) {
-		return generateDepositsFromExistingMnemonicNonInteractive(ctx, state)
+	if cmd.Bool(NonInteractiveFlag.Name) {
+		return generateDepositsFromExistingMnemonicNonInteractive(ctx, cmd, state)
 	}
 
-	return tui.Run(ctx, state, mnemonicInput.NewDepositMnemonicInput())
+	return tui.Run(ctx, cmd, state, mnemonicInput.NewDepositMnemonicInput())
 }
 
-func generateDepositsFromExistingMnemonicNonInteractive(ctx *cli.Context, state *app.State[app.DepositConfig]) error {
-	mnemonic, err := ReadMnemonic(ctx)
+func generateDepositsFromExistingMnemonicNonInteractive(
+	ctx context.Context,
+	cmd *cli.Command,
+	state *app.State[app.DepositConfig],
+) error {
+	mnemonic, err := ReadMnemonic(cmd)
 	if err != nil {
 		return err
 	}
 
-	password, err := ReadPassword(ctx)
+	password, err := ReadPassword(cmd)
 	if err != nil {
 		return err
 	}
 
 	return generateDeposits(
-		ctx.Context,
+		ctx,
 		state.
 			WithMnemonic(mnemonic, app.LanguageFromMnemonicConfig(state.Config().MnemonicConfig)).
 			WithPassword(password),

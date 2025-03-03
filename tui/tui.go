@@ -1,13 +1,19 @@
 package tui
 
 import (
+	"context"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/viwet/GoDepositCLI/app"
 )
 
-type NewModel[Config app.ConfigConstraint] func(ctx *cli.Context, state *app.State[Config]) (tea.Model, tea.Cmd)
+type NewModel[Config app.ConfigConstraint] func(
+	ctx context.Context,
+	cmd *cli.Command,
+	state *app.State[Config],
+) (tea.Model, tea.Cmd)
 
 type MainModel struct {
 	model       tea.Model
@@ -26,9 +32,9 @@ func newMainModel[Config app.ConfigConstraint](model tea.Model, initCommand tea.
 	}
 }
 
-func Run[Config app.ConfigConstraint](ctx *cli.Context, state *app.State[Config], newModel NewModel[Config]) error {
+func Run[Config app.ConfigConstraint](ctx context.Context, cmd *cli.Command, state *app.State[Config], newModel NewModel[Config]) error {
 	var (
-		model = newMainModel[Config](newModel(ctx, state))
+		model = newMainModel[Config](newModel(ctx, cmd, state))
 		err   error
 	)
 

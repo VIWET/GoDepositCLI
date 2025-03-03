@@ -2,42 +2,30 @@
 
 package cli
 
-import "github.com/urfave/cli/v2"
+import "github.com/urfave/cli/v3"
+
+const NetworkName = "Ethereum"
 
 var (
 	depositNewMnemonicFlags = []cli.Flag{
-		ConfigFlag,
-
-		StartIndexFlag,
-		NumberFlag,
-		ChainNameFlag,
-		ChainGenesisForkVersionFlag,
-		ChainGenesisValidatorsRootFlag,
-		MnemonicLanguageFlag,
+		// Mnemonic option
 		MnemonicBitlenFlag,
-		DirectoryFlag,
+		// Validator options
 		AmountsFlag,
 		WithdrawalAddressesFlag,
+		// Keystore options
 		KeystoreKDFFlag,
-
 		PasswordFlag,
 	}
 
 	depositExistingMnemonicFlags = []cli.Flag{
-		ConfigFlag,
-
-		StartIndexFlag,
-		NumberFlag,
-		ChainNameFlag,
-		ChainGenesisForkVersionFlag,
-		ChainGenesisValidatorsRootFlag,
+		// Mnemonic input
 		MnemonicFlag,
-		MnemonicLanguageFlag,
-		DirectoryFlag,
+		// Validator options
 		AmountsFlag,
 		WithdrawalAddressesFlag,
+		// Keystore options
 		KeystoreKDFFlag,
-
 		PasswordFlag,
 	}
 )

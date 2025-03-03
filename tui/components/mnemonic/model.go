@@ -1,6 +1,7 @@
 package mnemonic
 
 import (
+	"context"
 	"errors"
 	"strconv"
 	"strings"
@@ -10,7 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/viwet/GoDepositCLI/app"
 	"github.com/viwet/GoDepositCLI/tui"
 	"github.com/viwet/GoDepositCLI/tui/components/password"
@@ -19,8 +20,9 @@ import (
 const mnemonicColumns = 3
 
 type Model struct {
-	ctx   *cli.Context
-	state *app.State[app.DepositConfig]
+	ctx    context.Context
+	clicmd *cli.Command
+	state  *app.State[app.DepositConfig]
 
 	bindings bindings
 	style    style
@@ -29,7 +31,7 @@ type Model struct {
 	help help.Model
 }
 
-func New(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
+func New(ctx context.Context, clicmd *cli.Command, state *app.State[app.DepositConfig]) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	if mnemonic := state.Mnemonic(); len(mnemonic) == 0 {
 		cmd = generateMnemonic(state)
@@ -37,6 +39,7 @@ func New(ctx *cli.Context, state *app.State[app.DepositConfig]) (tea.Model, tea.
 
 	return Model{
 		ctx:      ctx,
+		clicmd:   clicmd,
 		state:    state,
 		bindings: newBindings(),
 		style:    newStyle(tui.DefaultColorscheme()),
@@ -62,11 +65,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.show = !m.show
 		case key.Matches(msg, m.bindings.accept):
 			next := password.NewDepositPassword()
-			return next(m.ctx, m.state)
+			return next(m.ctx, m.clicmd, m.state)
 		case key.Matches(msg, m.bindings.language):
-			return NewLanguage(m.ctx, m.state)
+			return NewLanguage(m.ctx, m.clicmd, m.state)
 		case key.Matches(msg, m.bindings.bitlen):
-			return NewBitlen(m.ctx, m.state)
+			return NewBitlen(m.ctx, m.clicmd, m.state)
 		case key.Matches(msg, m.bindings.quit):
 			return m, tui.QuitWithError(errors.New("mnemonic wasn't accepted"))
 		}

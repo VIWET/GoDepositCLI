@@ -2,50 +2,38 @@
 
 package cli
 
-import "github.com/urfave/cli/v2"
+import "github.com/urfave/cli/v3"
+
+const NetworkName = "Bahamut chain"
 
 var ContractAddressesFlag = &cli.StringSliceFlag{
-	Name:    "contracts",
-	Usage:   "Contract address to deposit with",
-	Aliases: []string{"contract", "c"},
+	Name:     "contracts",
+	Category: "Validator options",
+	Usage:    "Specify contract addresses for deposits",
+	Aliases:  []string{"contract", "c"},
 }
 
 var (
 	depositNewMnemonicFlags = []cli.Flag{
-		ConfigFlag,
-
-		StartIndexFlag,
-		NumberFlag,
-		ChainNameFlag,
-		ChainGenesisForkVersionFlag,
-		ChainGenesisValidatorsRootFlag,
-		MnemonicLanguageFlag,
+		// Mnemonic option
 		MnemonicBitlenFlag,
-		DirectoryFlag,
+		// Validator options
 		AmountsFlag,
 		WithdrawalAddressesFlag,
 		ContractAddressesFlag,
+		// Keystore options
 		KeystoreKDFFlag,
-
 		PasswordFlag,
 	}
 
 	depositExistingMnemonicFlags = []cli.Flag{
-		ConfigFlag,
-
-		StartIndexFlag,
-		NumberFlag,
-		ChainNameFlag,
-		ChainGenesisForkVersionFlag,
-		ChainGenesisValidatorsRootFlag,
+		// Mnemonic input
 		MnemonicFlag,
-		MnemonicLanguageFlag,
-		DirectoryFlag,
+		// Validator options
 		AmountsFlag,
 		WithdrawalAddressesFlag,
 		ContractAddressesFlag,
-		KeystoreKDFFlag,
-
+		// Keystore options
 		PasswordFlag,
 	}
 )
