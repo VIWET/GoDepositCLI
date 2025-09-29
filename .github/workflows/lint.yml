@@ -21,9 +21,9 @@ jobs:
         run: make generate
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.60
+          version: v2.4
 
   golangci-ethereum:
     name: lint-ethereum
@@ -39,6 +39,6 @@ jobs:
         run: make generate NETWORK=ethereum
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.60
+          version: v2.4

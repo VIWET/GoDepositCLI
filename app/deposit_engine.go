@@ -57,7 +57,7 @@ func (e *DepositEngine) Generate(ctx context.Context) ([]*types.Deposit, []*keys
 	var (
 		cfg = e.cfg
 
-		from, to uint32 = cfg.StartIndex, cfg.StartIndex + cfg.Number
+		from, to = cfg.StartIndex, cfg.StartIndex + cfg.Number
 	)
 
 	results, err := e.generateDeposits(ctx, indices(ctx, from, to))

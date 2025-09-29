@@ -56,12 +56,16 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/supranational/blst v0.3.13 h1:AYeSxdOMacwu7FBmpfloBz5pbFXDmJL33RuwnKtmTjk=
 github.com/supranational/blst v0.3.13/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
+github.com/supranational/blst v0.3.16 h1:bTDadT+3fK497EvLdWRQEjiGnUtzJ7jjIUMF0jqwYhE=
+github.com/supranational/blst v0.3.16/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
 github.com/urfave/cli/v3 v3.0.0-beta1 h1:6DTaaUarcM0wX7qj5Hcvs+5Dm3dyUTBbEwIWAjcw9Zg=
 github.com/urfave/cli/v3 v3.0.0-beta1/go.mod h1:FnIeEMYu+ko8zP1F9Ypr3xkZMIDqW3DR92yUtY39q1Y=
 github.com/viwet/GoBIP39 v1.0.0 h1:V5qgJCNKFdJbYm/iuarwhDj2v/5+0p+uSt5IsCf1rkQ=
 github.com/viwet/GoBIP39 v1.0.0/go.mod h1:+eB7W76SUJqxfeqMJf51KVCpBT2g/ANmQvm1ft4hpCY=
 github.com/viwet/GoBLS12381 v1.0.0 h1:5/g54LYKTvvyk56CcACse2s80bE9QsVGgua1tG9HD0c=
 github.com/viwet/GoBLS12381 v1.0.0/go.mod h1:i1603tSnY0e7J+IbNU3ecpw4YVLF/H3vrHe8HPxAT4Y=
+github.com/viwet/GoBLS12381 v1.0.1 h1:KrNbMjlOx8313qFnWyx5Pr8R/ayQHtScMOEXULbSZbI=
+github.com/viwet/GoBLS12381 v1.0.1/go.mod h1:i1603tSnY0e7J+IbNU3ecpw4YVLF/H3vrHe8HPxAT4Y=
 github.com/viwet/GoKeystoreV4 v1.0.1 h1:76bK3kYmOUFv/i7u8cdm3Azy+9eb9gsxn3LbOgaqUU4=
 github.com/viwet/GoKeystoreV4 v1.0.1/go.mod h1:j2n3b9DRKHEXkxsuMq5ClF2FgDK6RL9igL/GhSM4BZs=
 golang.org/x/crypto v0.31.0 h1:ihbySMvVjLAeSH1IbfcRTkD/iNscyz8rGzjF/E5hV6U=

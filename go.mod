@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
-	github.com/supranational/blst v0.3.13
+	github.com/supranational/blst v0.3.16
 	github.com/urfave/cli/v3 v3.0.0-beta1
 	github.com/viwet/GoBIP39 v1.0.0
 	golang.org/x/crypto v0.31.0
@@ -39,7 +39,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
-	github.com/viwet/GoBLS12381 v1.0.0
+	github.com/viwet/GoBLS12381 v1.0.1
 	github.com/viwet/GoKeystoreV4 v1.0.1
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

@@ -83,7 +83,7 @@ func Test_GenerateDeposits(t *testing.T) {
 		list     = words.English
 		password = "𝔱𝔢𝔰𝔱𝔭𝔞𝔰𝔰𝔴𝔬𝔯𝔡🔑"
 
-		from, to uint32 = cfg.StartIndex, cfg.StartIndex + cfg.Number
+		from, to = cfg.StartIndex, cfg.StartIndex + cfg.Number
 	)
 
 	if err := EnsureDepositConfigIsValid(cfg); err != nil {
@@ -223,7 +223,7 @@ func TestDepositEngine_Generate(t *testing.T) {
 		list     = words.English
 		password = "𝔱𝔢𝔰𝔱𝔭𝔞𝔰𝔰𝔴𝔬𝔯𝔡🔑"
 
-		from, to uint32 = cfg.StartIndex, cfg.StartIndex + cfg.Number
+		from, to = cfg.StartIndex, cfg.StartIndex + cfg.Number
 	)
 
 	if err := EnsureDepositConfigIsValid(cfg); err != nil {
@@ -362,7 +362,7 @@ func TestDepositEngine_Generate_Random(t *testing.T) {
 		list     = words.English
 		password = "𝔱𝔢𝔰𝔱𝔭𝔞𝔰𝔰𝔴𝔬𝔯𝔡🔑"
 
-		from, to uint32 = cfg.StartIndex, cfg.StartIndex + cfg.Number
+		from, to = cfg.StartIndex, cfg.StartIndex + cfg.Number
 	)
 
 	if err := EnsureDepositConfigIsValid(cfg); err != nil {

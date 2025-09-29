@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	bip39 "github.com/viwet/GoBIP39"
-	"github.com/viwet/GoBIP39/words"
 	bls12381 "github.com/viwet/GoBLS12381"
 	"github.com/viwet/GoDepositCLI/bls"
 	"github.com/viwet/GoDepositCLI/types"
@@ -14,10 +13,10 @@ import (
 // GenerateDeposits generates all deposits and keystores according to the config
 func GenerateDeposits(state *State[DepositConfig]) ([]*types.Deposit, []*keystore.Keystore, error) {
 	var (
-		cfg      *DepositConfig = state.cfg
-		mnemonic []string       = state.mnemonic
-		list     words.List     = state.list
-		password string         = state.password
+		cfg      = state.cfg
+		mnemonic = state.mnemonic
+		list     = state.list
+		password = state.password
 	)
 
 	seed, err := bip39.ExtractSeed(mnemonic, list, "")
@@ -29,7 +28,7 @@ func GenerateDeposits(state *State[DepositConfig]) ([]*types.Deposit, []*keystor
 		deposits  = make([]*types.Deposit, 0, cfg.Number)
 		keystores = make([]*keystore.Keystore, 0, cfg.Number)
 
-		from, to uint32 = cfg.StartIndex, cfg.StartIndex + cfg.Number
+		from, to = cfg.StartIndex, cfg.StartIndex + cfg.Number
 	)
 
 	for index := from; index < to; index++ {

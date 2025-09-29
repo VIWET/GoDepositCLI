@@ -106,7 +106,7 @@ func Test_GenerateBLSToExecutionMessages(t *testing.T) {
 		list     = words.English
 		password = "𝔱𝔢𝔰𝔱𝔭𝔞𝔰𝔰𝔴𝔬𝔯𝔡🔑"
 
-		from, to uint32 = dcfg.StartIndex, dcfg.StartIndex + dcfg.Number
+		from, to = dcfg.StartIndex, dcfg.StartIndex + dcfg.Number
 	)
 
 	if err := EnsureDepositConfigIsValid(dcfg); err != nil {

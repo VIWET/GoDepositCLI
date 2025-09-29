@@ -54,7 +54,7 @@ func (e *BLSToExecutionEngine) Generate(ctx context.Context) ([]*types.SignedBLS
 	var (
 		cfg = e.cfg
 
-		from, to uint32 = cfg.StartIndex, cfg.StartIndex + cfg.Number
+		from, to = cfg.StartIndex, cfg.StartIndex + cfg.Number
 	)
 
 	results, err := e.generateMessages(ctx, indices(ctx, from, to))

@@ -24,7 +24,7 @@ func GenerateBLSToExecutionMessages(state *State[BLSToExecutionConfig]) ([]*type
 	var (
 		messages = make([]*types.SignedBLSToExecution, 0, cfg.Number)
 
-		from, to uint32 = cfg.StartIndex, cfg.StartIndex + cfg.Number
+		from, to = cfg.StartIndex, cfg.StartIndex + cfg.Number
 	)
 
 	for index := from; index < to; index++ {
